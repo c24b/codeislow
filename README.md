@@ -58,5 +58,5 @@ En dépit des précautions employées (connexion forcée en HTTPS, fichier suppr
 
 Il vous faudra alors créer un fichier intitulé .env en prenant exemple sur le fichier dotenv.example renommé en .env, que vous placerez dans le même répertoire que ce fichier, avec le contenu ci-dessous, en remplaçant évidemment "XXXX" par les valeurs qui vous auront été fournies par PISTE.
 
-    CLIENT_ID = XXXX
-    CLIENT_SECRET = XXXX
+    API_KEY = XXXX
+    API_SECRET = XXXX

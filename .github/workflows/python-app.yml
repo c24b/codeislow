@@ -20,6 +20,13 @@ jobs:
       API_KEY: ${{ secrets.API_KEY }}
       API_SECRET: ${{ secrets.API_SECRET }}
     steps:
+    - name: Create dotenv
+    - uses: SpicyPizza/create-envfile@v1.3
+      with:
+        API_KEY: ${{ secrets.API_KEY }}
+        API_SECRET: ${{ secrets.API_SECRET }}
+        file_name: .env
+        fail_on_empty: false
     - uses: actions/checkout@v3
     - name: Set up Python 3.8
       uses: actions/setup-python@v3

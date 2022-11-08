@@ -8,7 +8,7 @@ Load document with the accepted extensions and transform into list of text
 
 """
 
-
+import os
 import docx
 from PyPDF2 import PdfReader
 from odf import text, teletype

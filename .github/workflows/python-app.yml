@@ -23,9 +23,10 @@ jobs:
     - name: Create dotenv
       run: |
         touch .env
-        echo API_KEY="$API_KEY" >> .env
-        echo API_SECRET="$API_SECRET" >> .env
+        echo API_KEY=${{secrets.API_KEY}} >> .env
+        echo API_SECRET=${{secrets.API_SECRET}} >> .env
         cat .env
+        echo $API_KEY
     - uses: actions/checkout@v3
     - name: Set up Python 3.8
       uses: actions/setup-python@v3

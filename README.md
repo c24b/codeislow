@@ -12,8 +12,9 @@ L'utilisateur indique sur quelles périodes passée et future il convient de vé
 
 > La plage de selection des périodes sera affinée dans les prochaines versions.
 
-L'utilisateur peut ensuite sélectionner les codes qu'il souhaite voir reconnaitre dans le document soumis. Par défaut, tous les codes supportés sont testés. 
-> si un code n'est pas sélectionné mais présent dans le texte: l'attribution des articles au bon code est erronée. Cela  sera reglé dans la prochaine version
+L'utilisateur peut ensuite sélectionner les codes qu'il souhaite voir reconnaitre dans le document soumis. Par défaut, tous les codes supportés sont testés.
+
+> si un code n'est pas sélectionné mais présent dans le texte: l'attribution des articles au bon code est erronée. Cela  sera reglé dans la prochaine version.
 ## Ouverture du fichier
 
 Le fichier est provisoirement enregistré sur le serveur puis passé à différentes libraries selon le format utilisé : [python-docx](https://python-docx.readthedocs.io/en/latest/), [odfpy](https://pypi.org/project/odfpy/) ou [PyPDF2](https://pypi.org/project/PyPDF2/). Dès que le fichier a été transformé en chaîne de caractères, il est [supprimé du serveur](./parsing.py).
@@ -46,7 +47,7 @@ Pour les autres, la date de début et la date de fin de version d'article sont c
 En fonction du résultat, l'article peut être classé comme ayant connu une version passée dans la période de référence pour le passé. 
 Son code de status est 301, et le message indique "Modifié le" avec la date de modification.
 
-Il peut être classé comme ayant vocation à changer dans la période de référence pour le futur. Son code 302 et le message indique "Valable jusqu'au" avec la date d'expiration. 
+Il peut être classé comme ayant vocation à changer dans la période de référence pour le futur. Son code 302 et le message indique "Valable jusqu'au" avec la date d'expiration.
 
 S'il n'a ni été modifié dans la période passée ni ne sera modifié dans la période future, il est classé dans la catégorie des articles correctements détectés mais ne présentant pas de modification.
 
@@ -58,7 +59,7 @@ Une version du programme utilisable par tous est mise à disposition sur un serv
 
 En dépit des précautions employées (connexion forcée en HTTPS, fichier supprimé avant la fin du script), il est déconseillé de soumettre à la version collective des fichiers contenant des données sensibles, confidentielles ou soumises à un secret professionnel. Le programme peut être exécuté sur votre machine et générera une page web identique purement locale. Seules les requêtes Légifrance sortiront vers l'extérieur. Cette solution requiert l'installation de Python, le clonage ou le téléchargement du dépôt Github, et [l'obtention d'identifiants pour l'API auprès de PISTE](https://developer.aife.economie.gouv.fr/).
 
-Il vous faudra alors créer un fichier intitulé .env en prenant exemple sur le fichier dotenv.example renommé en .env, que vous placerez dans le même répertoire que ce fichier, avec le contenu ci-dessous, en remplaçant évidemment "XXXX" par les valeurs qui vous auront été fournies par PISTE.
+Il vous faudra alors créer un fichier intitulé .env en prenant exemple sur le fichier dotenv.example renommé en .env, que vous placerez dans le même répertoire que ce fichier, en remplaçant évidemment "XXXX" par les valeurs qui vous auront été fournies par PISTE.
 
     API_KEY = XXXX
     API_SECRET = XXXX

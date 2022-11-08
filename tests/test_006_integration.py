@@ -45,7 +45,7 @@ class TestMainProcess:
             abspath = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), file_path
             )
-            for result in main(file_path):
+            for result in main(abspath, selected_codes, pattern_format, past, future):
                 assert isinstance(result, dict), result
 
 

@@ -1,9 +1,8 @@
 import os
 import re
-import pytest
 
 from test_001_parsing import parse_doc
-from test_002_code_references import filter_code_regex, CODE_REFERENCE, CODE_REGEX
+from test_002_code_references import filter_code_regex, CODE_REGEX
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 
@@ -61,7 +60,7 @@ def get_matching_results_dict(
         qualified_needle = {
             key: value for key, value in needle.items() if value is not None
         }
-        msg = f"#{i+1}\t{qualified_needle}"
+        # msg = f"#{i+1}\t{qualified_needle}"
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
@@ -132,7 +131,7 @@ def get_matching_result_item(
         qualified_needle = {
             key: value for key, value in needle.items() if value is not None
         }
-        msg = f"#{i+1}\t{qualified_needle}"
+        # msg = f"#{i+1}\t{qualified_needle}"
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]

@@ -273,7 +273,7 @@ class TestOAuthLegiFranceAPI:
         client_id = os.getenv("API_KEY2")
         client_secret = os.getenv("API_SECRET2")
         with pytest.raises(ValueError) as exc_info:
-            json_response = get_legifrance_auth(client_id, client_secret)
+            get_legifrance_auth(client_id, client_secret)
             assert (
                 str(exc_info.value)
                 == "No credential: client_id or/and client_secret are not set. \nPlease register your API at https://developer.aife.economie.gouv.fr/"
@@ -298,7 +298,7 @@ class TestGetArticleId:
             ("CSI", "R314-7", "LEGIARTI000037144520"),
         ],
     )
-    def test_get_article_uid(self, input_expected):
+    def test_article_uid(self, input_expected):
         load_dotenv()
         client_id = os.getenv("API_KEY")
         client_secret = os.getenv("API_SECRET")
@@ -313,7 +313,7 @@ class TestGetArticleId:
         client_secret = os.getenv("API_SECRET")
         headers = get_legifrance_auth(client_id, client_secret)
         article_uid = get_article_uid("CCIV", "11-20", headers)
-        assert article_uid == None, article_uid
+        assert article_uid is None, article_uid
 
     def test_get_article_uid_wrong_code_name(self):
         load_dotenv()
@@ -326,7 +326,7 @@ class TestGetArticleId:
             # FEATURE: faire une base de référence insensible à la casse
             article_uid = get_article_uid("Code Civil", "1120", headers)
             assert str(exc_info.value) == "", str(exc_info.value)
-            assert article_uid == None, article_uid
+            assert article_uid is None, article_uid
 
 
 class TestGetArticleContent:
@@ -569,21 +569,20 @@ class TestTimeDelta:
     def test_time_delta_wrong_op(self):
 
         with pytest.raises(ValueError) as e:
-            past_mul3 = time_delta("*", 3)
+            time_delta("*", 3)
             assert e == "ValueError: Wrong operator", e
 
     def test_time_delta_wrong_nb(self):
         with pytest.raises(TypeError) as e:
-            past_mul3 = time_delta("+", "9")
+            time_delta("+", "9")
             assert e == "TypeError: Year must be an integer", e
 
 
 class TestValidityArticle:
     def test_validity_soon_deprecated(self):
-        """ """
         year_nb = 2
         start = datetime.datetime(2018, 1, 1, 0, 0, 0)
-        past_boundary = time_delta("-", year_nb)
+        # past_boundary = time_delta("-", year_nb)
         end = datetime.datetime(2023, 1, 1, 0, 0, 0)
         future_boundary = time_delta("+", year_nb)
         # QUESTION: avons nous besoin de différencier avant et après?
@@ -604,7 +603,7 @@ class TestValidityArticle:
         start = datetime.datetime(2022, 8, 4, 0, 0, 0)
         past_boundary = time_delta("-", year_nb)
         end = datetime.datetime(2025, 1, 1, 0, 0, 0)
-        future_boundary = time_delta("+", year_nb)
+        # future_boundary = time_delta("+", year_nb)
         # QUESTION: avons nous besoin de différencier avant et après?
         assert start > past_boundary, (start > past_boundary, start, past_boundary)
         status_code, status_msg, color = get_validity_status(

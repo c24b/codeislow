@@ -11,7 +11,6 @@ Module pour requeter l'API
 
 import requests
 import time
-from dotenv import load_dotenv
 from code_references import get_code_full_name_from_short_code
 from check_validity import (
     convert_epoch_to_datetime,
@@ -53,7 +52,8 @@ def get_legifrance_auth(client_id, client_secret):
     if client_id is None or client_secret is None:
         # return HTTPError(401, "No credential have been set")
         raise ValueError(
-            "No credential: client_id or/and client_secret are not set. \nPlease register your API at https://developer.aife.economie.gouv.fr/"
+            "No credential: client_id or/and client_secret are not set."
+            + "\nPlease register your API at https://developer.aife.economie.gouv.fr/"
         )
     session = requests.Session()
     with session as s:
@@ -77,7 +77,8 @@ def get_legifrance_auth(client_id, client_secret):
 
 def get_article_uid(short_code_name, article_number, headers):
     """
-    GET the article uid given by [Legifrance API](https://developer.aife.economie.gouv.fr/index.php?option=com_apiportal&view=apitester&usage=api&apitab=tests&apiName=L%C3%A9gifrance+Beta&apiId=426cf3c0-1c6d-46ba-a8b0-f79289086ed5&managerId=2&type=rest&apiVersion=1.6.2.5&Itemid=402&swaggerVersion=2.0&lang=fr)
+    GET the article uid given by [Legifrance API]
+    (https://developer.aife.economie.gouv.fr/index.php?option=com_apiportal&view=apitester&usage=api&apitab=tests&apiName=L%C3%A9gifrance+Beta&apiId=426cf3c0-1c6d-46ba-a8b0-f79289086ed5&managerId=2&type=rest&apiVersion=1.6.2.5&Itemid=402&swaggerVersion=2.0&lang=fr)
 
     Arguments
     ---------
@@ -157,7 +158,9 @@ def get_article_uid(short_code_name, article_number, headers):
 
 def get_article_content(article_id, headers):
     """
-    GET article_content from LEGIFRANCE API using POST /consult/getArticle https://developer.aife.economie.gouv.fr/index.php?option=com_apiportal&view=apitester&usage=api&apitab=tests&apiName=L%C3%A9gifrance+Beta&apiId=426cf3c0-1c6d-46ba-a8b0-f79289086ed5&managerId=2&type=rest&apiVersion=1.6.2.5&Itemid=402&swaggerVersion=2.0&lang=fr
+    GET article_content from LEGIFRANCE API using
+    POST /consult/getArticle
+    https://developer.aife.economie.gouv.fr/index.php?option=com_apiportal&view=apitester&usage=api&apitab=tests&apiName=L%C3%A9gifrance+Beta&apiId=426cf3c0-1c6d-46ba-a8b0-f79289086ed5&managerId=2&type=rest&apiVersion=1.6.2.5&Itemid=402&swaggerVersion=2.0&lang=fr
 
     Arguments
     ----------
@@ -260,7 +263,8 @@ def get_article(
     long_code_name: str
         Nom du code de loi française dans sa version longue
     article_number: str
-        Numéro de l'article de loi normalisé ex. R25-67 L214 ou 2667-1-1
+        Numéro de l'article de loi normalisé
+        ex. R25-67 L214 ou 2667-1-1
     Returns
     --------
     article: str

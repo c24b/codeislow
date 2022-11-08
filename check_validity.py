@@ -13,12 +13,12 @@ Module de vérification du status de l'article
 - check validity: module qui définit le status de l'article en fonction d'une plage temporelle
 
 """
-from datetime import datetime
 import datetime
-from dateutil.relativedelta import relativedelta
+
+# from dateutil.relativedelta import relativedelta
 
 
-### TIME CONVERSION UTILS
+# TIME CONVERSION UTILS
 
 
 def convert_date_to_datetime(date):
@@ -63,7 +63,7 @@ def convert_str_to_datetime(date_time):
     return datetime.datetime.strptime(date_time, "%d/%m/%Y %H:%M:%S")
 
 
-### SPECIALS: plage de temps + status de l'article
+# SPECIALS: plage de temps + status de l'article
 def time_delta(operator, year_nb):
     """
     Calculer le différentiel de date selon l'opérator et le nombre d'années

@@ -9,8 +9,7 @@ Ce module permet la detection des articles du code de droit français
 
 import re
 
-from parsing import parse_doc
-from code_references import filter_code_regex, CODE_REFERENCE, CODE_REGEX
+from code_references import filter_code_regex
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 
@@ -56,7 +55,9 @@ def get_matching_results_dict(
     full_text, selected_short_codes=[], pattern_format="article_code"
 ):
     """
-    Une fonction qui renvoie un dictionnaire de resultats: trié par code (version abbréviée) avec la liste des articles détectés lui appartenant.
+    Une fonction qui renvoie un dictionnaire de resultats:
+    trié par code (version abbréviée) avec la liste des articles
+    détectés lui appartenant.
 
     Arguments
     ----------
@@ -80,7 +81,7 @@ def get_matching_results_dict(
         qualified_needle = {
             key: value for key, value in needle.items() if value is not None
         }
-        msg = f"#{i+1}\t{qualified_needle}"
+        # msg = f"#{i+1}\t{qualified_needle}"
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
@@ -158,7 +159,7 @@ def get_matching_result_item(
         qualified_needle = {
             key: value for key, value in needle.items() if value is not None
         }
-        msg = f"#{i+1}\t{qualified_needle}"
+        # msg = f"#{i+1}\t{qualified_needle}"
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]

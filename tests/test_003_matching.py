@@ -11,8 +11,6 @@ ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 # ARTICLE_ID = r"(L|R|A|D)?(\.|\s)?\d+(-\d+)?((\s(al\.|alinea)?\s\d+)?(\s|\.)"
 
 
-
-
 def switch_pattern(selected_codes=None, pattern="article_code"):
     """
     Build pattern recognition using pattern short code switch
@@ -39,9 +37,12 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
     #     # return re.compile(f"{code_regex}.*?{ARTICLE_REGEX}(\s|\.)(?P<ref>.*?)(\.|\s)", flags=re.I)
     #     return re.compile(f"{code_regex}.*?{ARTICLE_REGEX}.*?{ARTICLE_ID}", flags=re.I)
 
-def get_matching_results_dict(full_text, selected_short_codes=[], pattern_format="article_code"):
+
+def get_matching_results_dict(
+    full_text, selected_short_codes=[], pattern_format="article_code"
+):
     """ "
-    Une fonction qui revoie un dictionnaire de resultats: trié par code (version abbréviée) avec la liste des articles détectés lui appartenant. 
+    Une fonction qui revoie un dictionnaire de resultats: trié par code (version abbréviée) avec la liste des articles détectés lui appartenant.
 
     Arguments:
         full_text: a string of the full document normalized
@@ -108,13 +109,16 @@ def get_matching_results_dict(full_text, selected_short_codes=[], pattern_format
 
     return code_found
 
-def get_matching_result_item(full_text, selected_shortcodes=[], pattern_format="article_code"):
-    """"
+
+def get_matching_result_item(
+    full_text, selected_shortcodes=[], pattern_format="article_code"
+):
+    """ "
     Générateur: renvoie la référence de l'article détecté dans le texte
 
     Arguments:
         full_text: a string of the full document normalized
-        selected_shortcodes: a list of selected codes in short format for filtering article detection. Default is an empty list (which stands for no filter) 
+        selected_shortcodes: a list of selected codes in short format for filtering article detection. Default is an empty list (which stands for no filter)
         pattern_format: a string representing the pattern format article_code or code_article. Defaut to article_code
 
     Yield:
@@ -164,17 +168,18 @@ def get_matching_result_item(full_text, selected_shortcodes=[], pattern_format="
             # exemple: L-248-1 = > L248-1
             special_ref = ref.split("-", 1)
             if special_ref[0] in ["L", "A", "R", "D"]:
-                yield(code, "".join(special_ref))
-                
+                yield (code, "".join(special_ref))
+
             else:
-                yield(code, ref)
+                yield (code, ref)
+
 
 class TestMatching:
     def test_matching_result_dict_codes_no_filter_pattern_article_code(self):
         # NO CPCE ref dans le doc
         code_reference_test = CODE_REGEX
         del code_reference_test["CPCE"]
-        
+
         file_paths = ["newtest.doc", "newtest.docx", "newtest.pdf"]
         for file_path in file_paths:
             abspath = os.path.join(
@@ -182,13 +187,15 @@ class TestMatching:
             )
             full_text = parse_doc(abspath)
             results_dict = get_matching_results_dict(full_text, None, "article_code")
-            
-            
-            
+
             # del code_reference_test["CPCE"]
             code_list = list(results_dict.keys())
-            assert len(code_list) == len(code_reference_test), set(code_reference_test)- set(code_list)
-            assert sorted(code_list) == sorted(code_reference_test), set(code_reference_test)- set(code_list)
+            assert len(code_list) == len(code_reference_test), set(
+                code_reference_test
+            ) - set(code_list)
+            assert sorted(code_list) == sorted(code_reference_test), set(
+                code_reference_test
+            ) - set(code_list)
             articles_detected = [
                 item for sublist in results_dict.values() for item in sublist
             ]
@@ -208,23 +215,33 @@ class TestMatching:
                 "27",
             ], results_dict["CCIV"]
             assert results_dict["CPRCIV"] == ["1038", "1289-2"], results_dict["CPRCIV"]
-            assert results_dict["CASSUR"] == ["L385-2", "R343-4", "A421-13"], results_dict[
-                "CASSUR"
-            ]
+            assert results_dict["CASSUR"] == [
+                "L385-2",
+                "R343-4",
+                "A421-13",
+            ], results_dict["CASSUR"]
             assert results_dict["CCOM"] == ["L611-2"], results_dict["CCOM"]
             assert results_dict["CTRAV"] == ["L1111-1"], results_dict["CTRAV"]
             assert results_dict["CPI"] == ["L112-1", "L331-4"], results_dict["CPI"]
             assert results_dict["CPEN"] == ["131-4", "225-7-1"], results_dict["CPEN"]
             assert results_dict["CPP"] == ["694-4-1", "R57-6-1"], results_dict["CPP"]
-            assert results_dict["CCONSO"] == ["L121-14", "R742-52"], results_dict["CCONSO"]
+            assert results_dict["CCONSO"] == ["L121-14", "R742-52"], results_dict[
+                "CCONSO"
+            ]
             assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
             assert results_dict["CSS"] == ["L173-8"], results_dict["CSS"]
             assert results_dict["CSP"] == ["L1110-1"], results_dict["CSP"]
             assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
             assert results_dict["CJA"] == ["L121-2"], ("CJA", results_dict["CJA"])
-            assert results_dict["CGCT"] == ["L1424-71", "L1"], ("CGCT", results_dict["CGCT"])
-            assert results_dict["CESEDA"] == ["L753-1", "12"], ("CESEDA", results_dict["CESEDA"])
-    
+            assert results_dict["CGCT"] == ["L1424-71", "L1"], (
+                "CGCT",
+                results_dict["CGCT"],
+            )
+            assert results_dict["CESEDA"] == ["L753-1", "12"], (
+                "CESEDA",
+                results_dict["CESEDA"],
+            )
+
     def test_matching_result_dict_codes_unique_filter_pattern_article_code(self):
         selected_codes = ["CASSUR"]
         file_paths = ["newtest.doc", "newtest.docx", "newtest.pdf"]
@@ -233,20 +250,22 @@ class TestMatching:
                 os.path.dirname(os.path.realpath(__file__)), file_path
             )
             full_text = parse_doc(abspath)
-            results_dict = get_matching_results_dict(full_text,selected_codes, "article_code")
+            results_dict = get_matching_results_dict(
+                full_text, selected_codes, "article_code"
+            )
             code_list = list(results_dict.keys())
             assert len(code_list) == len(selected_codes), len(code_list)
-            assert sorted(code_list) == [
-                "CASSUR"
-            ], sorted(code_list)
+            assert sorted(code_list) == ["CASSUR"], sorted(code_list)
             # articles_detected = [
-                # item for sublist in results_dict.values() for item in sublist
+            # item for sublist in results_dict.values() for item in sublist
             # ]
             # assert len(articles_detected) == 37, len(articles_detected)
-            assert results_dict["CASSUR"] == ["L385-2", "R343-4", "A421-13"], results_dict[
-                "CASSUR"
-            ]
-            
+            assert results_dict["CASSUR"] == [
+                "L385-2",
+                "R343-4",
+                "A421-13",
+            ], results_dict["CASSUR"]
+
     def test_matching_result_dict_codes_multiple_filter_pattern_article_code(self):
         selected_codes = ["CASSUR", "CENV", "CSI", "CCIV"]
         file_paths = ["newtest.doc", "newtest.docx", "newtest.pdf"]
@@ -255,7 +274,9 @@ class TestMatching:
                 os.path.dirname(os.path.realpath(__file__)), file_path
             )
             full_text = parse_doc(abspath)
-            results_dict = get_matching_results_dict(full_text,selected_codes, "article_code")
+            results_dict = get_matching_results_dict(
+                full_text, selected_codes, "article_code"
+            )
             code_list = list(results_dict.keys())
             assert len(code_list) == len(selected_codes), len(code_list)
             assert sorted(code_list) == [
@@ -265,7 +286,7 @@ class TestMatching:
                 "CSI",
             ], sorted(code_list)
             # articles_detected = [
-                # item for sublist in results_dict.values() for item in sublist
+            # item for sublist in results_dict.values() for item in sublist
             # ]
             # assert len(articles_detected) == 37, len(articles_detected)
             assert results_dict["CCIV"] == [
@@ -287,5 +308,3 @@ class TestMatching:
             # ]
             # assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
             assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
-            
-    

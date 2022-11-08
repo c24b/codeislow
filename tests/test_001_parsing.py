@@ -61,7 +61,10 @@ class TestFileParsing:
         with pytest.raises(ValueError) as e:
             for file_path in file_paths:
                 parse_doc(file_path)
-                assert e == "Extension incorrecte: les fichiers acceptés terminent par *.odt, *.docx, *.doc,  *.pdf"
+                assert (
+                    e
+                    == "Extension incorrecte: les fichiers acceptés terminent par *.odt, *.docx, *.doc,  *.pdf"
+                )
 
     def test_wrong_file_path(self):
         """testing FileNotFound Error"""

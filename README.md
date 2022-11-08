@@ -10,8 +10,10 @@ Cela est suffisant pour soumettre même des thèses de doctorat aux formats ODT/
 
 L'utilisateur indique sur quelles périodes passée et future il convient de vérifier si l'article de code a connu ou connaîtra d'autres versions. Le champ demande des années ~mais accepte des nombres décimaux, ce qui permet par exemple une vérification sur les six derniers mois~.
 
+> La plage de selection des périodes sera affinée dans les prochaines versions.
+
 L'utilisateur peut ensuite sélectionner les codes qu'il souhaite voir reconnaitre dans le document soumis. Par défaut, tous les codes supportés sont testés. 
-> si un code n'est pas sélectionné mais présent dans le texte: l'attribution des articles au bon code est erronée. Cela  
+> si un code n'est pas sélectionné mais présent dans le texte: l'attribution des articles au bon code est erronée. Cela  sera reglé dans la prochaine version
 ## Ouverture du fichier
 
 Le fichier est provisoirement enregistré sur le serveur puis passé à différentes libraries selon le format utilisé : [python-docx](https://python-docx.readthedocs.io/en/latest/), [odfpy](https://pypi.org/project/odfpy/) ou [PyPDF2](https://pypi.org/project/PyPDF2/). Dès que le fichier a été transformé en chaîne de caractères, il est [supprimé du serveur](./parsing.py).

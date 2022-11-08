@@ -18,8 +18,8 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
-
 ### TIME CONVERSION UTILS
+
 
 def convert_date_to_datetime(date):
     return datetime.datetime.fromordinal(date.toordinal())
@@ -53,21 +53,22 @@ def convert_datetime_to_str(date_time):
 
 
 def convert_str_to_datetime(date_time):
-    '''
+    """
     convert string format into datetime
     Arguments:
         date_str: string representation of a date
     Returns:
         date_time: datetime
-    '''
+    """
     return datetime.datetime.strptime(date_time, "%d/%m/%Y %H:%M:%S")
+
 
 ### SPECIALS: plage de temps + status de l'article
 def time_delta(operator, year_nb):
     """
     Calculer le différentiel de date selon l'opérator et le nombre d'années
     Arguments
-    ---------- 
+    ----------
     operator: str
         chaine de caractère qui représente l'opérateur: - ou +
     year_nb: int
@@ -75,7 +76,7 @@ def time_delta(operator, year_nb):
     Return
     -------
     datetime_delta: datetime
-        objet datetime représentant la nouvelle date 
+        objet datetime représentant la nouvelle date
     """
     if operator not in ["-", "+"]:
         raise ValueError("Wrong operator")
@@ -91,9 +92,9 @@ def time_delta(operator, year_nb):
 def time_delta_to_epoch(operator, year_nb):
     """
     Calculer le différentiel de date selon l'opérator et le nombre d'années
-    
+
     Arguments
-    ---------- 
+    ----------
     operator: str
         chaine de caractère qui représente l'opérateur: - ou +
     year_nb: int
@@ -101,11 +102,11 @@ def time_delta_to_epoch(operator, year_nb):
     Return
     -------
     epoch_delta: int
-        timestamp/epoch représentant la nouvelle date 
+        timestamp/epoch représentant la nouvelle date
     """
-    
-    
+
     return convert_datetime_to_epoch(time_delta(operator, year_nb))
+
 
 def get_validity_status(start, end, year_before, year_after):
     """
@@ -119,7 +120,7 @@ def get_validity_status(start, end, year_before, year_after):
         Date de création de l'article
     year_after:int
         Nombre d'année après aujourd'hui
-    end: datetime 
+    end: datetime
         Date d'expiration de l'article
 
     Returns
@@ -134,9 +135,16 @@ def get_validity_status(start, end, year_before, year_after):
     past_boundary = time_delta("-", year_before)
     future_boundary = time_delta("+", year_after)
     if start > past_boundary:
-        return (301, "Modifié le {}".format(convert_datetime_to_str(start).split(" ")[0]), "yellow")
+        return (
+            301,
+            "Modifié le {}".format(convert_datetime_to_str(start).split(" ")[0]),
+            "yellow",
+        )
     if end < future_boundary:
-        return (302, "Valable jusqu'au {}".format(convert_datetime_to_str(end).split(" ")[0]), "orange")
+        return (
+            302,
+            "Valable jusqu'au {}".format(convert_datetime_to_str(end).split(" ")[0]),
+            "orange",
+        )
     if start < past_boundary and end > future_boundary:
         return (204, "Pas de modification", "green")
-

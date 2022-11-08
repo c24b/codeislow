@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#filename: matching.py
+# filename: matching.py
 """
 The matching module
 
@@ -18,8 +18,6 @@ ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 # ARTICLE_ID = r"(L|R|A|D)?(\.|\s)?\d+(-\d+)?((\s(al\.|alinea)?\s\d+)?(\s|\.)"
 
 
-
-
 def switch_pattern(selected_codes=None, pattern="article_code"):
     """
     Build pattern recognition using pattern short code switch
@@ -36,7 +34,7 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
         a compiled regex pattern
     Raise
     --------
-    ValueError: 
+    ValueError:
         pattern name is wrong
     """
 
@@ -53,9 +51,12 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
     #     # return re.compile(f"{code_regex}.*?{ARTICLE_REGEX}(\s|\.)(?P<ref>.*?)(\.|\s)", flags=re.I)
     #     return re.compile(f"{code_regex}.*?{ARTICLE_REGEX}.*?{ARTICLE_ID}", flags=re.I)
 
-def get_matching_results_dict(full_text, selected_short_codes=[], pattern_format="article_code"):
+
+def get_matching_results_dict(
+    full_text, selected_short_codes=[], pattern_format="article_code"
+):
     """
-    Une fonction qui renvoie un dictionnaire de resultats: trié par code (version abbréviée) avec la liste des articles détectés lui appartenant. 
+    Une fonction qui renvoie un dictionnaire de resultats: trié par code (version abbréviée) avec la liste des articles détectés lui appartenant.
 
     Arguments
     ----------
@@ -127,8 +128,11 @@ def get_matching_results_dict(full_text, selected_short_codes=[], pattern_format
 
     return code_found
 
-def get_matching_result_item(full_text, selected_shortcodes=[], pattern_format="article_code"):
-    """"
+
+def get_matching_result_item(
+    full_text, selected_shortcodes=[], pattern_format="article_code"
+):
+    """ "
     Renvoie les références des articles détectés dans le texte
 
     Arguments
@@ -136,7 +140,7 @@ def get_matching_result_item(full_text, selected_shortcodes=[], pattern_format="
     full_text: str
         a string of the full document normalized
     selected_shortcodes: array
-        a list of selected codes in short format for filtering article detection. Default is an empty list (which stands for no filter) 
+        a list of selected codes in short format for filtering article detection. Default is an empty list (which stands for no filter)
     pattern_format: str
     a string representing the pattern format article_code or code_article. Defaut to article_code
 
@@ -190,7 +194,7 @@ def get_matching_result_item(full_text, selected_shortcodes=[], pattern_format="
             # exemple: L-248-1 = > L248-1
             special_ref = ref.split("-", 1)
             if special_ref[0] in ["L", "A", "R", "D"]:
-                yield(code, "".join(special_ref))
-                
+                yield (code, "".join(special_ref))
+
             else:
-                yield(code, ref)
+                yield (code, ref)

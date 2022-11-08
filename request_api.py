@@ -13,11 +13,14 @@ import requests
 import time
 from dotenv import load_dotenv
 from code_references import get_code_full_name_from_short_code
-from check_validity import convert_epoch_to_datetime, convert_datetime_to_str, get_validity_status
+from check_validity import (
+    convert_epoch_to_datetime,
+    convert_datetime_to_str,
+    get_validity_status,
+)
 
 API_ROOT_URL = "https://sandbox-api.piste.gouv.fr/dila/legifrance-beta/lf-engine-app/"
 # API_ROOT_URL =  "https://api.piste.gouv.fr/dila/legifrance-beta/lf-engine-app/",
-
 
 
 def get_legifrance_auth(client_id, client_secret):
@@ -38,9 +41,9 @@ def get_legifrance_auth(client_id, client_secret):
 
     Raise
     ------
-    Exception: 
+    Exception:
         No credentials have been set. Client_id or client_secret is None
-    Exception: 
+    Exception:
         Invalid credentials. Request to authentication server failed with 400 or 401 error
     """
 
@@ -78,9 +81,9 @@ def get_article_uid(short_code_name, article_number, headers):
 
     Arguments
     ---------
-    code_name:str 
+    code_name:str
         Nom du code de droit français (version courte)
-    article_number: str 
+    article_number: str
         Référence de l'article mentionné (version normalisée eg. L25-67)
 
     Returns
@@ -92,7 +95,7 @@ def get_article_uid(short_code_name, article_number, headers):
     ValueError:
         Le nom du code est incorrect
     Exception:
-        La requete a échoué response.status_code [400-500] 
+        La requete a échoué response.status_code [400-500]
     """
     long_code = get_code_full_name_from_short_code(short_code_name)
     if long_code is None:
@@ -150,7 +153,6 @@ def get_article_uid(short_code_name, article_number, headers):
             return results[0]["sections"][0]["extracts"][0]["id"]
         except IndexError:
             return None
-    
 
 
 def get_article_content(article_id, headers):
@@ -167,7 +169,7 @@ def get_article_content(article_id, headers):
         a dictionnary with the full content of article
     Raise
     -------
-    Exception 
+    Exception
         response.status_code [400-500]
     """
     data = {"id": article_id}
@@ -201,7 +203,7 @@ def get_article_content(article_id, headers):
             article[k] = raw_article[k]
         # FEATURE - integrer les différentes versions
         article["nb_versions"] = len(article["articleVersions"])
-        
+
         return article
     except KeyError:
         return None
@@ -241,7 +243,15 @@ def get_article_content_by_id_and_article_nb(article_id, article_num, headers):
         article_content = response.json()
     return article_content["article"]
 
-def get_article(short_code_name, article_number, client_id, client_secret, past_year_nb=3, future_year_nb=3):
+
+def get_article(
+    short_code_name,
+    article_number,
+    client_id,
+    client_secret,
+    past_year_nb=3,
+    future_year_nb=3,
+):
     """
     Accéder aux informations simplifiée de l'article
 
@@ -254,9 +264,9 @@ def get_article(short_code_name, article_number, client_id, client_secret, past_
     Returns
     --------
     article: str
-        Un dictionnaire json avec code (version courte), article (numéro), status, status_code, color, url, text, id, start_date, end_date, date_debut, date_fin 
+        Un dictionnaire json avec code (version courte), article (numéro), status, status_code, color, url, text, id, start_date, end_date, date_debut, date_fin
     """
-    
+
     article = {
         "code": short_code_name,
         "code_full_name": get_code_full_name_from_short_code(short_code_name),
@@ -269,8 +279,10 @@ def get_article(short_code_name, article_number, client_id, client_secret, past_
         "date_debut": "",
         "date_fin": "",
         "id": get_article_uid(
-            short_code_name, article_number, headers=get_legifrance_auth(client_id, client_secret)
-        )
+            short_code_name,
+            article_number,
+            headers=get_legifrance_auth(client_id, client_secret),
+        ),
     }
     if article["id"] is None:
         article["color"] = "danger"
@@ -285,11 +297,11 @@ def get_article(short_code_name, article_number, client_id, client_secret, past_
     article["url"] = article_content["url"]
     article["start_date"] = convert_epoch_to_datetime(article_content["dateDebut"])
     article["end_date"] = convert_epoch_to_datetime(article_content["dateFin"])
-    article["status_code"], article["status"], article["color"] = get_validity_status(article["start_date"], article["end_date"], past_year_nb, future_year_nb)
+    article["status_code"], article["status"], article["color"] = get_validity_status(
+        article["start_date"], article["end_date"], past_year_nb, future_year_nb
+    )
     article["date_debut"] = convert_datetime_to_str(article["start_date"]).split(" ")[0]
     article["date_fin"] = convert_datetime_to_str(article["end_date"]).split(" ")[0]
     del article["start_date"]
     del article["end_date"]
     return article
-
-

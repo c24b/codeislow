@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-start_results="""<!DOCTYPE html>
+start_results = """<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -51,7 +51,7 @@ start_results="""<!DOCTYPE html>
                 </thead>
                 <tbody>
 """
-end_results="""</tbody>
+end_results = """</tbody>
             </table>
         <a href="/" class="btn btn-primary" role="button">Nouvelle Analyse</a>
         <a href="/" class="btn btn-info disabled"  role="button">Exporter au format csv</a>

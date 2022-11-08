@@ -259,5 +259,3 @@ def get_article_content_by_id_and_article_nb(article_id, article_num, headers):
             raise Exception(f"Error {response.status_code}: {response.reason}")
         article_content = response.json()
     return article_content["article"]
-
-

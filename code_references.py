@@ -48,27 +48,28 @@ CODE_REFERENCE = {
     "CJA": "Code de justice administrative",
 }
 
-def get_long_and_short_code(code_name: str) -> (str,str):
-    '''
+
+def get_long_and_short_code(code_name: str) -> (str, str):
+    """
     Accéder aux deux versions du nom du code: le nom complet et son abréviation
 
     Parameters
     ----------
-    code_name : str 
+    code_name : str
         le nom du code (version longue ou courte)
-    
+
     Returns
-    ----------    
+    ----------
     long_code: str
         le nom complet du code
     short_code: str
         l'abréviation du code
-    
+
     Notes
     ----------
     Si le nom du code n'a pas été trouvé les valeurs sont nulles (None, None)
-    '''
-    
+    """
+
     if code_name in CODE_REFERENCE.keys():
         short_code = code_name
         long_code = CODE_REFERENCE[code_name]
@@ -77,11 +78,11 @@ def get_long_and_short_code(code_name: str) -> (str,str):
         short_code_results = [k for k, v in CODE_REFERENCE.items() if v == code_name]
         if len(short_code_results) > 0:
             short_code = short_code_results[0]
-        else: 
+        else:
             short_code = None
     else:
         short_code, long_code = None, None
-    return(long_code, short_code)
+    return (long_code, short_code)
 
 
 def get_code_full_name_from_short_code(short_code):
@@ -92,12 +93,12 @@ def get_code_full_name_from_short_code(short_code):
     ----------
     short_code: str
         short form of Code eg. CCIV
-    
+
     Returns
     ----------
     full_name: str
         long form of code eg. Code Civil
-    
+
     """
     try:
         return CODE_REFERENCE[short_code]
@@ -115,9 +116,9 @@ def get_short_code_from_full_name(full_name):
 
     Arguments
     ----------
-    full_name: str 
+    full_name: str
         long form of code eg. Code Civil
-    
+
     Returns
     ----------
     short_code: str
@@ -129,7 +130,7 @@ def get_short_code_from_full_name(full_name):
     else:
         return None
 
-    
+
 def filter_code_regex(selected_codes):
     """
     Contruire l'expression régulière pour détecter les différents codes dans le document.
@@ -138,7 +139,7 @@ def filter_code_regex(selected_codes):
     ----------
     selected_codes: array
         [short_code, ...]. Default: None (no filter)
-    
+
     Returns
     ----------
     regex: str
@@ -147,12 +148,12 @@ def filter_code_regex(selected_codes):
     if selected_codes is None:
         return "({})".format("|".join(list(CODE_REGEX.values())))
 
-     
     if len(selected_codes) == 1:
         return CODE_REGEX[selected_codes[0]]
     else:
-        selected_code_list = [CODE_REGEX[x] for x in sorted(selected_codes)] 
+        selected_code_list = [CODE_REGEX[x] for x in sorted(selected_codes)]
         return "({})".format("|".join(selected_code_list))
+
 
 def filter_code_reference(selected_codes=None):
     """
@@ -170,4 +171,3 @@ def filter_code_reference(selected_codes=None):
     if selected_codes is None:
         return CODE_REFERENCE
     return {x: CODE_REFERENCE[x] for x in sorted(selected_codes)}
-

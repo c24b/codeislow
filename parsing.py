@@ -19,23 +19,23 @@ ACCEPTED_EXTENSIONS = ("odt", "pdf", "docx", "doc")
 
 def parse_doc(file_path):
     """
-    Parcourir le document pour en extraire le texte 
+    Parcourir le document pour en extraire le texte
     Arguments
     ----------
-    file_path: str 
+    file_path: str
         absolute filepath of the document
     Returns
     ----------
-    full_text: array 
+    full_text: array
         a list of sentences.
     Raises
     ----------
-    Exception: 
+    Exception:
         Extension incorrecte. Les types de fichiers supportés sont odt, doc, docx, pdf
-    FileNotFoundError: 
+    FileNotFoundError:
         File has not been found. File_path must be incorrect
     """
-    
+
     doc_name, doc_ext = file_path.split("/")[-1].split(".")
     if doc_ext not in ACCEPTED_EXTENSIONS:
         raise ValueError(

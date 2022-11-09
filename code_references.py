@@ -7,6 +7,7 @@ Code references module:
 - Get name and abbreviation for codes
 
 """
+from type import Any, Tuple
 
 CODE_REGEX = {
     "CCIV": r"(?P<CCIV>Code\scivil|C\.\sciv\.|Code\sciv\.|C\.civ\.|civ\.|CCIV)",
@@ -49,7 +50,7 @@ CODE_REFERENCE = {
 }
 
 
-def get_long_and_short_code(code_name: str) -> (str, str):
+def get_long_and_short_code(code_name: str) -> Tuple[str,str]:
     """
     Accéder aux deux versions du nom du code: le nom complet et son abréviation
 
@@ -85,7 +86,7 @@ def get_long_and_short_code(code_name: str) -> (str, str):
     return (long_code, short_code)
 
 
-def get_code_full_name_from_short_code(short_code):
+def get_code_full_name_from_short_code(short_code) -> Any(str, None):
     """
     Shortcut to get corresponding full_name from short_code
 
@@ -110,7 +111,7 @@ def get_code_full_name_from_short_code(short_code):
             return None
 
 
-def get_short_code_from_full_name(full_name):
+def get_short_code_from_full_name(full_name:str) -> Any(str, None):
     """
     Shortcut to get corresponding short_code from full_name
 
@@ -131,7 +132,7 @@ def get_short_code_from_full_name(full_name):
         return None
 
 
-def filter_code_regex(selected_codes):
+def filter_code_regex(selected_codes: list)-> str:
     """
     Contruire l'expression régulière pour détecter les différents codes dans le document.
 
@@ -145,7 +146,7 @@ def filter_code_regex(selected_codes):
     regex: str
         a regex expression to match codes
     """
-    if selected_codes is None:
+    if selected_codes is None or len(selected_codes) == 0:
         return "({})".format("|".join(list(CODE_REGEX.values())))
 
     if len(selected_codes) == 1:
@@ -155,7 +156,7 @@ def filter_code_regex(selected_codes):
         return "({})".format("|".join(selected_code_list))
 
 
-def filter_code_reference(selected_codes=None):
+def filter_code_reference(selected_codes=None: Any(list, None))-> dict:
     """
     Filtrer le dictionnaire de référence des codes
 
@@ -168,6 +169,6 @@ def filter_code_reference(selected_codes=None):
     code_reference_dict_filtered: dict
         The CODE_REFERENCE filtered with only the selected codes
     """
-    if selected_codes is None:
+    if selected_codes is None or len(selected_codes) == 0:
         return CODE_REFERENCE
     return {x: CODE_REFERENCE[x] for x in sorted(selected_codes)}

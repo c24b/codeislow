@@ -114,7 +114,7 @@ def filter_code_regex(selected_codes):
     Returns:
         regex: string
     """
-    if selected_codes is None:
+    if selected_codes is None or len(selected_codes) == 0:
         return "({})".format("|".join(list(CODE_REGEX.values())))
 
     if len(selected_codes) == 1:
@@ -133,7 +133,7 @@ def filter_code_reference(selected_codes=None):
     Returns:
         code_reference_dict_filtered: filtered_CODE_REFERENCE
     """
-    if selected_codes is None:
+    if selected_codes is None or len(selected_codes) == 0:
         return CODE_REFERENCE
     return {x: CODE_REFERENCE[x] for x in sorted(selected_codes)}
 

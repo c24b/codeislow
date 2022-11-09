@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import datetime
-
+import pytest
 
 ### TIME CONVERSION UTILS
 
@@ -30,7 +30,7 @@ def convert_datetime_to_epoch(date_time):
 
 def convert_date_to_str(date_time):
     """convert datetime into string format"""
-    return datetime.datetime.strftime(date_time[:4], "%d/%m/%Y")
+    return datetime.datetime.strftime(date_time, "%d/%m/%Y")
 
 
 def convert_datetime_to_str(date_time):
@@ -113,3 +113,42 @@ def get_validity_status(start, end, year_before, year_after):
         )
     if start < past_boundary and end > future_boundary:
         return (204, "Pas de modification", "green")
+
+class TestTimeConverters:
+    def test_date_datetime_converter(self):
+        today = datetime.date.today()
+        today_dt = convert_date_to_datetime(today)
+        
+        today_date = convert_datetime_to_date(today_dt)
+        assert (today.year, today.month, today.day)  == (today_date.year, today_date.month, today_date.day)
+        assert (today_date.hour, today_date.minute, today_date.second) == (0,0,0) 
+        today_date_str = convert_date_to_str(today_date)
+        today_str = convert_date_to_str(today)
+        assert today_date_str == today_str
+    
+    def test_epoch_datetime_converter(self):
+        now = datetime.datetime.now()
+        epoch_now = convert_datetime_to_epoch(now)
+        datetime_now = convert_epoch_to_datetime(epoch_now)
+        assert datetime_now == now
+
+# class TestTimeDelta:
+#     @pytest.mark.parametrize(
+#         "input",
+#         [
+#             ("+", 100, ""),
+#             ("-", 100, ""),
+#             ("+", 3, ""),
+#             ("-", 3, ""),
+#             ("+", 2, ""),
+#             ("-", 2, ""),
+#             ("+", 1, ""),
+#             ("-", 1, ""),
+#             ("+", 0, ""),
+#             ("-", 0, ""),
+#         ],
+#     )
+#     class test_time_delta(input):
+#         input_op, input_nb, expected = input
+#         result = time_delta(input_op, input_nb)
+#         assert result == expected, result

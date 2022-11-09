@@ -2,7 +2,7 @@ import os
 import re
 
 from test_001_parsing import parse_doc
-from test_002_code_references import filter_code_regex, CODE_REGEX
+from test_002_code_references import filter_code_regex, CODE_REGEX, filter_code_reference
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 
@@ -31,6 +31,8 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
         )
     if pattern == "article_code":
         return re.compile(f"{ARTICLE_REGEX}(?P<ref>.*?){code_regex}", flags=re.I)
+    else:
+        return re.compile(f"{code_regex}")
     # else:
     #     #code_article
     #     # return re.compile(f"{code_regex}.*?{ARTICLE_REGEX}(\s|\.)(?P<ref>.*?)(\.|\s)", flags=re.I)
@@ -50,7 +52,10 @@ def get_matching_results_dict(
     Returns:
         code_found: a dict compose of short version of code as key and list of the detected articles references  as values {code: [art_ref, art_ref2, ... ]}
     """
-    article_pattern = switch_pattern(selected_short_codes, pattern_format)
+    selected_codes = filter_code_reference(selected_short_codes)
+    
+    #Force to detect every article of every code
+    article_pattern = switch_pattern(None, pattern_format)
     code_found = {}
 
     # normalisation
@@ -64,7 +69,10 @@ def get_matching_results_dict(
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
-
+        # Ten filter code to selected short code: if not in selected short_codes
+        print( code, selected_codes)
+        if code not in  selected_codes:
+            continue
         ref = match.group("ref").strip()
         # split multiple articles of a same code
         refs = [
@@ -123,7 +131,10 @@ def get_matching_result_item(
     Yield:
         (code_short_name:str, article_number:str)
     """
-    article_pattern = switch_pattern(selected_shortcodes, pattern_format)
+    selected_codes = filter_code_reference(selected_shortcodes)
+    
+    #Force to detect every article of every code
+    article_pattern = switch_pattern(None, pattern_format)
     # normalisation des espaces dans le texte
     full_text = re.sub(r"\r|\n|\t|\f|\xa0", " ", " ".join(full_text))
     for i, match in enumerate(re.finditer(article_pattern, full_text)):
@@ -135,7 +146,8 @@ def get_matching_result_item(
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
-
+        if code not in selected_codes:
+            continue
         ref = match.group("ref").strip()
         # split multiple articles of a same code example: Article 22, 23 et 24 du Code
         refs = [

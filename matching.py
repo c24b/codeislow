@@ -9,7 +9,7 @@ Ce module permet la detection des articles du code de droit français
 
 import re
 
-from code_references import filter_code_regex
+from code_references import filter_code_regex, filter_code_reference
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 
@@ -71,7 +71,12 @@ def get_matching_results_dict(
     code_found: dict
         a dict compose of short version of code as key and list of the detected articles references  as values {code: [art_ref, art_ref2, ... ]}
     """
-    article_pattern = switch_pattern(selected_short_codes, pattern_format)
+    selected_codes = filter_code_reference(selected_short_codes)
+    
+    #Force to detect every article of every code
+    article_pattern = switch_pattern(None, pattern_format)
+
+    # article_pattern = switch_pattern(selected_short_codes, pattern_format)
     code_found = {}
 
     # normalisation
@@ -85,7 +90,8 @@ def get_matching_results_dict(
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
-
+        if code not in selected_codes:
+            continue
         ref = match.group("ref").strip()
         # split multiple articles of a same code
         refs = [
@@ -151,7 +157,11 @@ def get_matching_result_item(
 
     article_number:str
     """
-    article_pattern = switch_pattern(selected_shortcodes, pattern_format)
+    selected_codes = filter_code_reference(selected_shortcodes)
+    
+    #Force to detect every article of every code
+    article_pattern = switch_pattern(None, pattern_format)
+    # article_pattern = switch_pattern(selected_shortcodes, pattern_format)
     # normalisation des espaces dans le texte
     full_text = re.sub(r"\r|\n|\t|\f|\xa0", " ", " ".join(full_text))
     for i, match in enumerate(re.finditer(article_pattern, full_text)):
@@ -163,7 +173,8 @@ def get_matching_result_item(
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
-
+        if code not in selected_codes:
+            continue
         ref = match.group("ref").strip()
         # split multiple articles of a same code example: Article 22, 23 et 24 du Code
         refs = [

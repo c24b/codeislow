@@ -1,5 +1,6 @@
 import requests
 import os
+from pathlib import Path
 import datetime
 import time
 from dotenv import load_dotenv
@@ -280,12 +281,31 @@ class TestOAuthLegiFranceAPI:
             ), str(exc_info.value)
 
 
+class TestLoadDotEnv:
+    def test_dotenv_file(self):
+        curr_dir = os.getcwd()
+        my_file = curr_dir + "/.env"
+        # assert my_file == "", my_file
+        assert Path(my_file).is_file() is True, "Error: no .env file"
+        assert Path(my_file).exists() is True, "Error: no .env file"
+
+    def test_dotenv_values(self):
+        load_dotenv()
+        assert os.getenv("API_KEY") is not None, "Error no API_KEY set in .env file"
+        assert (
+            os.getenv("API_SECRET") is not None
+        ), "Error no API_SECRET set in .env file"
+
+
 class TestGetArticleId:
     def test_get_article_uid(self):
         load_dotenv()
         client_id = os.getenv("API_KEY")
+        assert client_id is not None, "Error no API KEY"
         client_secret = os.getenv("API_SECRET")
+        assert client_secret is not None, "Error no API_SECRET"
         headers = get_legifrance_auth(client_id, client_secret)
+        assert headers is not None, "Errors no token"
         article = get_article_uid("CCIV", "1120", headers)
         assert article == "LEGIARTI000032040861", article
 

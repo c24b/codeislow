@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python3.8
 # filename: code_references
 """
 Code references module:
@@ -86,7 +86,7 @@ def get_long_and_short_code(code_name: str) -> Tuple[str,str]:
     return (long_code, short_code)
 
 
-def get_code_full_name_from_short_code(short_code) -> Any(str, None):
+def get_code_full_name_from_short_code(short_code: str) -> Any(str, None):
     """
     Shortcut to get corresponding full_name from short_code
 
@@ -156,7 +156,7 @@ def filter_code_regex(selected_codes: list)-> str:
         return "({})".format("|".join(selected_code_list))
 
 
-def filter_code_reference(selected_codes=None: Any(list, None))-> dict:
+def filter_code_reference(selected_codes:Any(list, None)= None)-> dict:
     """
     Filtrer le dictionnaire de référence des codes
 

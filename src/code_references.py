@@ -7,7 +7,7 @@ Code references module:
 - Get name and abbreviation for codes
 
 """
-from typing import Any, Tuple
+from typing import Any, Tuple, Union
 
 CODE_REGEX = {
     "CCIV": r"(?P<CCIV>Code\scivil|C\.\sciv\.|Code\sciv\.|C\.civ\.|civ\.|CCIV)",
@@ -164,7 +164,7 @@ def filter_code_regex(selected_codes: list)-> str:
         return "({})".format("|".join(selected_code_list))
 
 
-def filter_code_reference(selected_codes:list = [])-> dict:
+def filter_code_reference(selected_codes:Union[None, list] = [])-> dict:
     """
     Filtrer le dictionnaire de référence des codes
 
@@ -179,4 +179,12 @@ def filter_code_reference(selected_codes:list = [])-> dict:
     """
     if selected_codes is None or len(selected_codes) == 0:
         return CODE_REFERENCE
-    return {x: CODE_REFERENCE[x] for x in sorted(selected_codes)}
+    selected_code_refs = {}
+    for x in sorted(selected_codes):
+        try:
+            value = CODE_REFERENCE[x]
+            selected_code_refs[x] = value
+        except KeyError:
+            pass
+    
+    return selected_code_refs

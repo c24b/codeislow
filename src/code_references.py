@@ -10,12 +10,12 @@ Code references module:
 from typing import Any, Tuple, Union
 
 CODE_REGEX = {
-    "CCIV": r"(?P<CCIV>Code\scivil|C\.\sciv\.|Code\sciv\.|C\.civ\.|civ\.|CCIV)",
+    "CCIV": r"(?P<CCIV>Code\scivil|C\.\s?civ\.|Code\sciv\.|civ\.|CCIV)",
     "CPRCIV": r"(?P<CPRCIV>Code\sde\sprocédure\scivile|C\.\spr\.\sciv\.|CPC)",
     "CCOM": r"(?P<CCOM>Code\sd(e|u)\scommerce|C\.\scom\.)",
     "CTRAV": r"(?P<CTRAV>Code\sdu\stravail|C\.\strav\.)",
     "CPI": r"(?P<CPI>Code\sde\sla\spropriété\sintellectuelle|CPI|C\.\spr\.\sint\.)",
-    "CPEN": r"(?P<CPEN>Code\spénal|C\.\spén\.)",
+    "CPEN": r"(?P<CPEN>Code\sp(é|e)nal|C\.\s?p(é|e)n\.)",
     "CPP": r"(?P<CPP>Code\sde\sprocédure\spénale|CPP)",
     "CASSUR": r"(?P<CASSUR>Code\sdes\sassurances|C\.\sassur\.)",
     "CCONSO": r"(?P<CCONSO>Code\sde\sla\sconsommation|C\.\sconso\.)",

@@ -50,7 +50,7 @@ CODE_REFERENCE = {
 }
 
 
-def get_long_and_short_code(code_name: str) -> Tuple[str,str]:
+def get_long_and_short_code(code_name: str) -> Tuple[str, str]:
     """
     Accéder aux deux versions du nom du code: le nom complet et son abréviation
 
@@ -111,7 +111,7 @@ def get_code_full_name_from_short_code(short_code: str) -> str:
             return None
 
 
-def get_short_code_from_full_name(full_name:str) -> str:
+def get_short_code_from_full_name(full_name: str) -> str:
     """
     Shortcut to get corresponding short_code from full_name
 
@@ -132,7 +132,7 @@ def get_short_code_from_full_name(full_name:str) -> str:
         return None
 
 
-def filter_code_regex(selected_codes: list)-> str:
+def filter_code_regex(selected_codes: list) -> str:
     """
     Contruire l'expression régulière pour détecter les différents codes dans le document.
 
@@ -160,11 +160,11 @@ def filter_code_regex(selected_codes: list)-> str:
             try:
                 selected_code_list.append(CODE_REGEX[x])
             except KeyError:
-                pass 
+                pass
         return "({})".format("|".join(selected_code_list))
 
 
-def filter_code_reference(selected_codes:Union[None, list] = [])-> dict:
+def filter_code_reference(selected_codes: Union[None, list] = []) -> dict:
     """
     Filtrer le dictionnaire de référence des codes
 
@@ -186,5 +186,5 @@ def filter_code_reference(selected_codes:Union[None, list] = [])-> dict:
             selected_code_refs[x] = value
         except KeyError:
             pass
-    
+
     return selected_code_refs

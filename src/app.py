@@ -79,25 +79,25 @@ def upload():
     ]
     if len(selected_codes) == 0:
         selected_codes = None
-    yield '''<div id="processing" class="alert alert-info" role="alert">
+    yield """<div id="processing" class="alert alert-info" role="alert">
     <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
   <span aria-hidden="true">&times;</span>
 </button>Traitement et détection des articles en cours...<br>Veuillez patientez...</div>
-''' 
+"""
     yield start_results
-    
+
     try:
         for row in load_result(file_path, None, "article_code", past, future):
             yield row
     except Exception as e:
-        row = f'''
+        row = f"""
         <div class="alert alert-warning" role="alert">
         <h2> Erreur</h2>
         <p>Quelque chose s'est mal passé: <code>{e}</code>
         <p> Contactez
         <a href="#" class="alert-link">l'administrateur</a></p>
         </div>
-        '''
+        """
         yield row
     #     row = f'''
     #         <tr scope="row"><a href='{article["url"]}'>{article["code"]} - {article["article"]}</a></tr>

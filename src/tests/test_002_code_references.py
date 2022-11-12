@@ -4,7 +4,12 @@ from .context import code_references
 from code_references import CODE_REFERENCE, CODE_REGEX
 from code_references import get_code_full_name_from_short_code
 from code_references import get_short_code_from_full_name
-from code_references import get_long_and_short_code, filter_code_regex, filter_code_reference
+from code_references import (
+    get_long_and_short_code,
+    filter_code_regex,
+    filter_code_reference,
+)
+
 
 class TestCodeFormats:
     @pytest.mark.parametrize("input", list(CODE_REFERENCE.keys()))
@@ -27,15 +32,18 @@ class TestCodeFormats:
         result = get_long_and_short_code(input)
         expected = (CODE_REFERENCE[input], input)
         assert expected == result, result
-    
+
     def test_short_code_not_found(self):
         result = get_long_and_short_code("RGPD")
         assert result == (None, None)
 
     def test_long_code_not_found(self):
-        result = get_short_code_from_full_name("Règlement Général sur la Protection des Données")
+        result = get_short_code_from_full_name(
+            "Règlement Général sur la Protection des Données"
+        )
         assert result is None
-    
+
+
 class TestFilterRegexCode:
     def test_code_regex_not_found(self):
         assert filter_code_regex(["RG2A"]) is None

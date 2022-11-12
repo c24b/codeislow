@@ -31,13 +31,12 @@ def main_result_sorted(
     client_secret = os.getenv("API_SECRET")
     # parse
     full_text = parse_doc(file_path)
-    results_dict = get_matching_results_dict(
-        full_text, selected_codes, pattern_format
-    )
+    results_dict = get_matching_results_dict(full_text, selected_codes, pattern_format)
     if len(results_dict) == 0:
         raise ValueError("ERROR: pas d'article detecté....")
     else:
         return results_dict
+
 
 def main(
     file_path, selected_codes=None, pattern_format="article_code", past=3, future=3

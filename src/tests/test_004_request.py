@@ -7,11 +7,13 @@ from dotenv import load_dotenv
 import pytest
 
 from .context import code_references, check_validity, request_api
-from request_api import get_legifrance_auth, get_article_uid, get_article_content, get_article
-from check_validity import (
-    get_validity_status,
-    time_delta
+from request_api import (
+    get_legifrance_auth,
+    get_article_uid,
+    get_article_content,
+    get_article,
 )
+from check_validity import get_validity_status, time_delta
 
 
 class TestOAuthLegiFranceAPI:
@@ -171,12 +173,8 @@ class TestGetArticle:
             past_year_nb=3,
             future_year_nb=3,
         )
-        assert article["date_debut"] == "01/07/2016", article[
-            "date_debut"
-        ]
-        assert article["date_fin"] == "01/01/2999", article[
-            "date_fin"
-        ]
+        assert article["date_debut"] == "01/07/2016", article["date_debut"]
+        assert article["date_fin"] == "01/01/2999", article["date_fin"]
         assert (
             article["url"]
             == "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000032227262"
@@ -209,7 +207,7 @@ class TestGetArticle:
     )
     def test_get_multiple_articles(self, input_expected):
         load_dotenv()
-        
+
         client_id = os.getenv("API_KEY")
         client_secret = os.getenv("API_SECRET")
         code_short_name, art_num, art_id, status_code = input_expected
@@ -237,55 +235,14 @@ class TestGetArticle:
     @pytest.mark.parametrize(
         "input_expected",
         [
-            (
-                "CCONSO",
-                "L121-14",
-                "01/07/2016",
-                "01/01/2999"
-            ),
-            (
-                "CCONSO",
-                "R742-52",
-                "01/07/2016",
-                "01/01/2999"
-            ),
-            (
-                "CSI",
-                "L622-7",
-                "27/05/2021",
-                "26/11/2022"
-            ),
-            (
-                "CSI",
-                "R314-7",
-                "01/08/2018",
-                "01/01/2999"
-            ),
-            (
-                "CGCT",
-                "L1424-71",
-                "01/01/2015",
-                "01/01/2999"
-            ),
-            (
-                "CJA",
-                "L121-2",
-                "01/01/2022",
-                "01/01/2999"
-                
-            ),
-            (
-                "CESEDA",
-                "L753-1",
-                "01/05/2021",
-                "01/01/2999"
-            ),
-            (
-                "CENV",
-                "L124-1",
-                "01/01/2016",
-                "01/01/2999"
-            ),
+            ("CCONSO", "L121-14", "01/07/2016", "01/01/2999"),
+            ("CCONSO", "R742-52", "01/07/2016", "01/01/2999"),
+            ("CSI", "L622-7", "27/05/2021", "26/11/2022"),
+            ("CSI", "R314-7", "01/08/2018", "01/01/2999"),
+            ("CGCT", "L1424-71", "01/01/2015", "01/01/2999"),
+            ("CJA", "L121-2", "01/01/2022", "01/01/2999"),
+            ("CESEDA", "L753-1", "01/05/2021", "01/01/2999"),
+            ("CENV", "L124-1", "01/01/2016", "01/01/2999"),
         ],
     )
     def test_get_multiple_articles_validity(self, input_expected):
@@ -304,6 +261,7 @@ class TestGetArticle:
             code_short_name,
             art_num,
         )
+
     @pytest.mark.parametrize(
         "input_expected",
         [
@@ -315,7 +273,7 @@ class TestGetArticle:
             ("CJA", "121-2", None),
             ("CESEDA", "753-1", None),
             ("CENV", "124-1", None),
-        ]
+        ],
     )
     def test_get_not_found_articles(self, input_expected):
         load_dotenv()

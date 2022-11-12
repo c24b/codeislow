@@ -11,7 +11,7 @@ from check_validity import (
     convert_date_to_str,
     convert_datetime_to_epoch,
     convert_epoch_to_datetime,
-    time_delta
+    time_delta,
 )
 
 
@@ -37,10 +37,11 @@ class TestTimeConverters:
         datetime_now = convert_epoch_to_datetime(epoch_now)
         assert datetime_now == now
 
+
 class TestSimpleTimeDeltaOperation:
     @pytest.mark.parametrize(
         "input",
-        [  
+        [
             ("+", 100),
             ("-", 100),
             ("+", 3),
@@ -50,7 +51,7 @@ class TestSimpleTimeDeltaOperation:
             ("+", 1),
             ("-", 1),
             ("+", 0),
-            ("-", 0)
+            ("-", 0),
         ],
     )
     def test_time_delta_operation_expected(self, input):
@@ -61,7 +62,7 @@ class TestSimpleTimeDeltaOperation:
             assert result.year == today_dt.year + input_nb, result
         else:
             assert result.year == today_dt.year - input_nb, result
-    
+
     # def test_time_delta_expected(self, input_expected):
     #     input_op, input_nb, expected = input_expected
     #     result = time_delta(input_op, input_nb)

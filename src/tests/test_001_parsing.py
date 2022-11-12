@@ -3,7 +3,7 @@
 import os
 import shutil
 import pytest
-from .context import parsing 
+from .context import parsing
 from parsing import ACCEPTED_EXTENSIONS, parse_doc
 
 
@@ -13,26 +13,26 @@ TMP_DIR = os.path.join(TEST_DIR, "tmp")
 if not os.path.exists(TMP_DIR):
     os.makedirs(TMP_DIR)
 
+
 def archive_test_file(filename: str) -> str:
     abspath = os.path.join(TEST_DIR, filename)
-    tmp_abspath = os.path.join(TEST_DIR,"tmp", filename)
+    tmp_abspath = os.path.join(TEST_DIR, "tmp", filename)
     shutil.copy(abspath, tmp_abspath)
     return tmp_abspath
 
+
 def restore_test_file(filename: str) -> str:
     abspath = os.path.join(TEST_DIR, filename)
-    tmp_abspath = os.path.join(TEST_DIR,"tmp", filename)
+    tmp_abspath = os.path.join(TEST_DIR, "tmp", filename)
     shutil.move(tmp_abspath, abspath)
     return abspath
-
-
 
 
 class TestFileParsing:
     def test_wrong_extension(self):
         """testing accepted extensions"""
         file_paths = ["document.rtf", "document.md", "document.xlsx"]
-        
+
         for file_path in file_paths:
             with pytest.raises(ValueError) as e:
                 # archive_test_file(file_path)
@@ -57,11 +57,11 @@ class TestFileParsing:
             abspath = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), file_path
             )
-            # as file is removed during parse_doc 
+            # as file is removed during parse_doc
             # archive it
             archive_test_file(file_path)
             full_text = parse_doc(abspath)
-            #and restore it
+            # and restore it
             restore_test_file(file_path)
             doc_name, doc_ext = abspath.split("/")[-1].split(".")
             assert doc_name == "newtest" or doc_name == "testnew"
@@ -92,11 +92,10 @@ class TestFileParsing:
             assert any("art." in _x for _x in full_text) is True
             assert any("Art." in _x for _x in full_text) is True
             assert any("Code" in _x for _x in full_text) is True
+
     def test_HDR_document(self):
         file_path = "HDR_NETTER_V1_07.odt"
-        abspath = os.path.join(
-                os.path.dirname(os.path.realpath(__file__)), file_path
-            )
+        abspath = os.path.join(os.path.dirname(os.path.realpath(__file__)), file_path)
         archive_test_file(file_path)
         full_text = parse_doc(abspath)
         restore_test_file(file_path)

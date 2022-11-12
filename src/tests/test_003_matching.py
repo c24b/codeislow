@@ -110,10 +110,10 @@ class TestMatching:
             full_text = parse_doc(abspath)
             restored_abspath = restore_test_file(file_path)
             results_dict = get_matching_results_dict(full_text, None, "article_code")
-            
+
             # del code_reference_test["CPCE"]
             code_list = list(results_dict.keys())
-            
+
             assert len(code_list) == len(code_reference_test), set(
                 code_reference_test
             ) - set(code_list)

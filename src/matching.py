@@ -9,7 +9,7 @@ Ce module permet la detection des articles du code de droit français
 import logging
 import re
 
-from code_references import filter_code_regex, filter_code_reference, CODE_REGEX
+from code_references import filter_code_regex, filter_code_reference, get_code_full_name_from_short_code
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 
@@ -72,12 +72,11 @@ def get_code_refs_reversed_pattern(full_text, pattern_regex, selected_codes):
         if i+1 == len(code_name_list):
             text_by_codes.append(chunk1) 
     for code, chunk_text in zip(code_list,text_by_codes): 
-        print(code, chunk_text)
         for match in re.finditer(article_regex, chunk_text):
             if code in list(selected_codes):
                 match = match.group("ref").strip()
                 if match != '':
-                    yield code, match
+                    yield code, get_code_full_name_from_short_code(code), match
     
 def get_code_refs_classical_pattern(full_text:str, article_pattern:str, selected_codes:list):
     
@@ -86,14 +85,16 @@ def get_code_refs_classical_pattern(full_text:str, article_pattern:str, selected
         qualified_needle = {
             key: value for key, value in needle.items() if value is not None
         }
-        msg = f"#{i+1}\t{qualified_needle}"
-        print(msg)
+        # msg = f"#{i+1}\t{qualified_needle}"
+        # print(msg)
         # logging.debug(msg)
         # get the code shortname based on regex group name <code>
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
         if code in selected_codes:
-            yield (code, match.group("ref").strip())
-
+            match = match.group("ref").strip()
+            if match != '':
+                yield code, get_code_full_name_from_short_code(code), match
+            
 def get_code_refs(full_text, pattern_format, selected_codes):
     #Force to detect every article of every code
     article_pattern = switch_pattern(None, pattern_format)
@@ -131,6 +132,8 @@ def normalize_references(ref):
         #remove first caret -2323 => 2323
         if ref.endswith("-"):
             ref = ref[:-1]
+        if ref.startswith("-"):
+            ref = ref[1:]
         # remove caret separating article nb between first letter
         # exemple: L-248-1 = > L248-1
         special_ref = ref.split("-", 1)
@@ -167,13 +170,13 @@ def get_matching_results_dict(
     code_found = {}
     # normalisation
     full_text = re.sub(r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text))
-    for code, ref in get_code_refs(full_text, pattern_format,selected_codes):
-        if code not in code_found:
+    for short_code, code, ref in get_code_refs(full_text, pattern_format,selected_codes):
+        if short_code not in code_found:
             # append article references
-            code_found[code] = normalize_references(ref)
+            code_found[short_code] = normalize_references(ref)
         else:
             # append article references to existing list
-            code_found[code].extend(normalize_references(ref))
+            code_found[short_code].extend(normalize_references(ref))
     return code_found
 
 
@@ -201,6 +204,7 @@ def get_matching_result_item(
     selected_codes = filter_code_reference(selected_shortcodes)
     
     full_text = re.sub(r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text))
-    for code, ref in get_code_refs(full_text, pattern_format,selected_codes):
-        yield (code, normalize_references(ref))
+    for short_code, code, refs in get_code_refs(full_text, pattern_format,selected_codes):
+        for ref in normalize_references(refs):
+            yield (short_code, code, ref)
     

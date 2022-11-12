@@ -3,7 +3,7 @@ Split a text using each element of a list as delimiter
 """
 import re
 
-REGEX = re.compile("\d")
+REGEX = re.compile("/d")
 
 atext = "1Accrocher le linge2Tailler les haies3Ranger le grenier1Vider les poubelles"
 alist = ["1", "2", "3", "1"]

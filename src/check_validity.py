@@ -44,7 +44,7 @@ def convert_datetime_to_epoch(date_time):
 
 def convert_date_to_str(date_time):
     """convert datetime into string format"""
-    return datetime.datetime.strftime(date_time[:4], "%d/%m/%Y")
+    return datetime.datetime.strftime(date_time, "%d/%m/%Y")
 
 
 def convert_datetime_to_str(date_time):
@@ -138,13 +138,13 @@ def get_validity_status(start, end, year_before, year_after):
         return (
             301,
             "Modifié le {}".format(convert_datetime_to_str(start).split(" ")[0]),
-            "yellow",
+            "warning",
         )
     if end < future_boundary:
         return (
             302,
             "Valable jusqu'au {}".format(convert_datetime_to_str(end).split(" ")[0]),
-            "orange",
+            "danger",
         )
     if start < past_boundary and end > future_boundary:
-        return (204, "Pas de modification", "green")
+        return (204, "Pas de modification", "success")

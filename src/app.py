@@ -17,7 +17,7 @@ from result_templates import start_results, end_results
 
 app = Bottle()
 
-environment = Environment(loader=FileSystemLoader("templates/"))
+environment = Environment(loader=FileSystemLoader("./templates/"))
 
 
 @app.route("/")
@@ -44,7 +44,7 @@ def codes():
     for short_code, long_code in CODE_REFERENCE.items():
         regex_c = CODE_REGEX[short_code]
         regex = f"<code>{regex_c}</code>"
-        comment = """<a href="" class="badge badge-pill badge-primary">?</a>"""
+        comment = """<a href="https://github.com/c24b/codeislow/issues/new?assignees=c24b&labels=enhancement&template=-feature--am%C3%A9lioration-de-la-regex.md&title=%5BREGEX%5D" class="badge badge-pill badge-primary">?</a>"""
         code_full_list.append((long_code, short_code, regex, comment))
     template = environment.get_template("codes.html")
     return template.render(codes_full_list=code_full_list)
@@ -61,10 +61,12 @@ def codes():
 
 @app.route("/upload/", method="POST")
 def upload():
+    if not os.path.exists("tmp"):
+        os.makedirs("tmp")
     upload = request.files.get("upload")
     name, ext = os.path.splitext(upload.filename)
 
-    if ext not in (".doc", ".docx", ".odt", ".pdf"):
+    if ext not in (".docx", ".odt", ".pdf", ".doc"):
         return "Le format du fichier est incorrect"
     file_path = os.path.join("tmp", upload.filename)
     upload.save(file_path)
@@ -77,8 +79,25 @@ def upload():
     ]
     if len(selected_codes) == 0:
         selected_codes = None
+    yield '''<div id="processing" class="alert alert-info" role="alert">
+    <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
+  <span aria-hidden="true">&times;</span>
+</button>Traitement et détection des articles en cours...<br>Veuillez patientez...</div>
+''' 
     yield start_results
-    for row in load_result(file_path, None, "article_code", past, future):
+    
+    try:
+        for row in load_result(file_path, None, "article_code", past, future):
+            yield row
+    except Exception as e:
+        row = f'''
+        <div class="alert alert-warning" role="alert">
+        <h2> Erreur</h2>
+        <p>Quelque chose s'est mal passé: <code>{e}</code>
+        <p> Contactez
+        <a href="#" class="alert-link">l'administrateur</a></p>
+        </div>
+        '''
         yield row
     #     row = f'''
     #         <tr scope="row"><a href='{article["url"]}'>{article["code"]} - {article["article"]}</a></tr>

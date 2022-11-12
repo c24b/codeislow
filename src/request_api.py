@@ -246,6 +246,12 @@ def get_article_content_by_id_and_article_nb(article_id, article_num, headers):
         article_content = response.json()
     return article_content["article"]
 
+def set_article_not_found(article):
+    article["color"] = "dark"
+    article["status_code"] = 404
+    article["status"] = "Indisponible"
+    article["texte"] = ""
+    return article
 
 def get_article(
     short_code_name,
@@ -289,11 +295,20 @@ def get_article(
         ),
     }
     if article["id"] is None:
-        article["color"] = "danger"
-        article["status_code"] = 404
-        article["status"] = "Indisponible"
-        article["texte"] = "x"
-        return article
+        #test with less info
+        article_number_tmp = article_number.split("-")[0]  
+        if article_number_tmp != article_number:
+            article["id"] =  get_article_uid(
+                short_code_name,
+                article_number_tmp,
+                headers=get_legifrance_auth(client_id, client_secret),
+            )
+            if article['id'] is None:
+                return set_article_not_found(article)
+            
+        else:
+            return set_article_not_found(article)
+
     article_content = get_article_content(
         article["id"], headers=get_legifrance_auth(client_id, client_secret)
     )

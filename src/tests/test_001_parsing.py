@@ -6,7 +6,9 @@ import pytest
 from .context import parsing 
 from parsing import ACCEPTED_EXTENSIONS, parse_doc
 
+
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+SRC_DIR = os.path.dirname(TEST_DIR)
 TMP_DIR = os.path.join(TEST_DIR, "tmp")
 if not os.path.exists(TMP_DIR):
     os.makedirs(TMP_DIR)
@@ -50,7 +52,7 @@ class TestFileParsing:
 
     def test_content(self):
         """test content text"""
-        file_paths = ["newtest.doc", "newtest.docx", "newtest.pdf", "testnew.odt"]
+        file_paths = ["newtest.docx", "newtest.pdf", "testnew.odt"]
         for file_path in file_paths:
             abspath = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)), file_path

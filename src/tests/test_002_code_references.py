@@ -1,6 +1,6 @@
 import pytest
 import random
-from .context import code_references 
+from .context import code_references
 from code_references import CODE_REFERENCE, CODE_REGEX
 from code_references import get_code_full_name_from_short_code
 from code_references import get_short_code_from_full_name

@@ -6,6 +6,8 @@ start_results = """<!DOCTYPE html>
 
 <head>
   <meta charset="utf-8">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Code is low - Accueil</title>
@@ -37,6 +39,7 @@ start_results = """<!DOCTYPE html>
               </ul>
             </div>
           </nav>
+          
           <div class="main" style="margin-top:2%">
           <div class="container text-center">
             <h2>Resultats de l'analyse </h2>
@@ -55,14 +58,14 @@ end_results = """</tbody>
             </table>
         <a href="/" class="btn btn-primary" role="button">Nouvelle Analyse</a>
         <a href="/" class="btn btn-info disabled"  role="button">Exporter au format csv</a>
-        <a href="/" class="btn btn-warning disabled" role="button">Signaler une erreur</a>
+        <a href="https://github.com/c24b/codeislow/issues/new?assignees=c24b&labels=bug&template=failed-detection.md&title=%5BFAIL%5D" class="btn btn-danger" role="button">Signaler une erreur</a>
         
         
         </div>
         </div>
         <footer style="margin:2%" class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
 
-    <p class="">Un <a href="">programme expérimental</a> par <a href="">E. Netter</a> et <a href="">C. de Quatrebarbes</a></p>
+    <p class="">Un <a href="http://github.com/c24b/codeislow">programme expérimental</a> par <a href="">E. Netter</a> et <a href="">C. de Quatrebarbes</a></p>
     <p>codeislow[at]email.enetter.fr</p> 
     
 

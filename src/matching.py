@@ -16,10 +16,34 @@ from code_references import (
 )
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
-
+COMPILED_ARTICLE = re.compile(ARTICLE_REGEX, re.I)
 ARTICLE_REF = r"\d+"
 ARTICLE_NUM = r"(?P<ref>.*?\d{1,4}(.?-\d{1,4}.?)?)"
 
+
+def detect_format_pattern(full_text):
+    """
+    Détecter le format des références juridiques: article XXX du code YYY ou code YYY article XXX
+
+    Arguments
+    ---------
+    full_text: str
+        le texte du document à analyser
+    Returns
+    -------
+    format_pattern: str
+        le type de format des références juridiques: code_article ou article_code
+    """
+
+    split_text = re.split(COMPILED_ARTICLE, full_text)
+    code_regex = filter_code_regex(None)
+    if re.search(re.compile(f"{code_regex}", flags=re.I), split_text[0]):
+
+        print("found", split_text[0])
+        return "code_article"
+    else:
+        return "article_code"   
+        
 
 def switch_pattern(selected_codes=None, pattern="article_code"):
     """
@@ -187,9 +211,9 @@ def get_matching_results_dict(
 
     code_found = {}
     # normalisation
-    full_text = re.sub(
-        r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    )
+    # full_text = re.sub(
+    #     r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
+    # )
     for short_code, code, ref in get_code_refs(
         full_text, pattern_format, selected_codes
     ):
@@ -225,9 +249,9 @@ def get_matching_result_item(
     """
     selected_codes = filter_code_reference(selected_shortcodes)
 
-    full_text = re.sub(
-        r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    )
+    # full_text = re.sub(
+    #     r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
+    # )
     for short_code, code, refs in get_code_refs(
         full_text, pattern_format, selected_codes
     ):

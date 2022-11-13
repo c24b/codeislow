@@ -9,11 +9,69 @@ from matching import (
     get_matching_result_item,
     switch_pattern,
     get_code_refs,
+    detect_format_pattern,
+    normalize_references,
+    COMPILED_ARTICLE,
 )
 from .test_001_parsing import restore_test_file, archive_test_file
 
 
-class TestMatching:
+class TestPattern:
+    @pytest.mark.parametrize(
+        "input_expected",
+        [
+            (
+                "Comme il est mentionné dans l'article 238-4 alinéa 2 du code de la consommation .",
+                "article_code",
+            ),
+            (
+                "Comme il est mentionné dans l'art.238-4 alinéa 2 du C.conso.",
+                "article_code",
+            ),
+            (
+                "Comme il est mentionné dans le code de la consommation article 238-4 alinéa 2.",
+                "code_article",
+            ),
+            (
+                "Comme il est mentionné dans  le C.conso. art.238-4 alinéa 2  qui blablabla",
+                "code_article",
+            ),
+        ],
+    )
+    def test_detect_format_pattern_txt(self, input_expected):
+        input, expected = input_expected
+        assert detect_format_pattern(input) == expected, input
+
+    @pytest.mark.parametrize(
+        "filepath_expected",
+        [
+            (
+                "newtest.pdf",
+                "article_code",
+            ),
+            (
+                "testnew.pdf",
+                "code_article",
+            ),
+            (
+                "newtest.odt",
+                "article_code",
+            ),
+            (
+                "testnew.odt",
+                "code_article",
+            ),
+        ],
+    )
+    def test_detect_format_pattern_doc(self, filepath_expected):
+        filepath, expected = filepath_expected
+        archive_test_file(filepath)
+        full_text = parse_doc(filepath)
+        restore_test_file(filepath)
+        assert detect_format_pattern(full_text) == expected, re.split(
+            COMPILED_ARTICLE, input
+        )[0]
+
     def test_switch_pattern_wrong_pattern(self):
         with pytest.raises(ValueError) as e:
             switch_pattern(None, "code_code")
@@ -28,39 +86,110 @@ class TestMatching:
         assert repr(pattern_code).startswith("re.compile("), repr(pattern_code)
         assert repr(pattern_article).startswith("re.compile("), repr(pattern_article)
 
+class TestGetRefs:
+    @pytest.mark.parametrize(
+        "input_expected",
+        [
+            (
+                "238-4 alinéa 2",
+                ["238-4"],
+            ),
+            (
+                "238 alinéa 2",
+                ["238"],
+            ),
+            (
+                "2-3-4",
+                ["2-3-4"],
+            ),
+            ("a R2-3-4", ["R2-3-4"]),
+            (
+                "L.278",
+                ["L278"],
+            ),
+            (
+                "L. 385-2, R. 343-4 et A421-13",
+                ["L385-2", "R343-4", "A421-13"],
+            ),
+            ("Articles L-214 et L228-2 alinéa 33", ["L214", "L228-2"]),
+        ],
+    )
+    def test_normalize_refs(self, input_expected):
+        input, expected = input_expected
+        assert normalize_references(input) == expected, input
+
+class TestMatching:
+    
+    
     @pytest.mark.parametrize(
         "input_expected",
         [
             (
                 "Comme il est mentionné dans l'article 238-4 alinéa 2 du code de la consommation .",
-                ["Code de la consommation", "238-4"],
+                ("CCONSO", "Code de la consommation", "238-4"),
             ),
             (
-                "Comme il est mentionné dans l'art.238-4 alinéa 2 du C.conso.",
-                ["Code de la consommation", "238-4"],
+                "Comme il est mentionné dans l'art.238 alinéa 2 du C.conso.",
+                ("CCONSO", "Code de la consommation", "238"),
             ),
             (
                 "Art. 2-3-4 du Code de l'Environnement",
-                ["Code de l'environnement", "2-3-4"],
+                ("CENV", "Code de l'environnement", "2-3-4"),
             ),
-            ("Art. R2-3-4 du CE.", ["Code de l'environnement", "R2-3-4"]),
+            ("Art. R2-3-4 du CE.", ("CENV", "Code de l'environnement", "R2-3-4")),
             (
                 "\n-\n article L.278 du cjaaa",
-                ["Code de justice administrative", "L278"],
+                ("CJA", "Code de justice administrative", "L278"),
             ),
-            (
-                "Art. L. 385-2, R. 343-4 et A421-13 du C. assur. ",
-                [
-                    ["Code des assurances", "L385-2"],
-                    ["Code des assurances", "R343-4"],
-                    ["Code des assurances", "A421-13"],
-                ],
-            ),
+            
         ],
     )
     def test_matching_result_item(self, input_expected):
         input, expected = input_expected
-        for item in get_matching_result_item(input):
+        for item in get_matching_result_item(input, None):
+            assert expected == item, item
+    
+    @pytest.mark.parametrize(
+        "input_expected",
+        [
+            [
+                "Art. L. 385-2, R. 343-4 et A421-13 du C. assur. ",
+                (
+                    ("CASSUR", "Code des assurances", "L385-2"),
+                    ("CASSUR", "Code des assurances", "R343-4"),
+                    ("CASSUR", "Code des assurances", "A421-13"),
+                )
+            ],
+            [
+                "Article L. 189-2, 343-4 et L-421-13 du CE.",
+                (
+                    ("CENV", "Code de l'environnement", "L189-2"),
+                    ("CENV", "Code de l'environnement", "343-4"),
+                    ("CENV", "Code de l'environnement", "L421-13"),
+                )
+            ],
+            [
+                "C. assur. Art. L. 385-2, R. 343-4 et A421-13",
+                (
+                    ("CASSUR", "Code des assurances", "L385-2"),
+                    ("CASSUR", "Code des assurances", "R343-4"),
+                    ("CASSUR", "Code des assurances", "A421-13"),
+                )
+            ],
+            [       
+                "CE. Article L. 189-2, 343-4 et L-421-13",
+                (
+                    ("CENV", "Code de l'environnement", "L189-2"),
+                    ("CENV", "Code de l'environnement", "343-4"),
+                    ("CENV", "Code de l'environnement", "L421-13"),
+                ),
+            ]
+        ]
+    )
+    def test_matching_item_multi(self, input_expected):
+        input, expected = input_expected
+        for item in get_matching_result_item(input, None):
+            print(item)
             assert item == expected, item
 
     @pytest.mark.parametrize(
@@ -68,31 +197,31 @@ class TestMatching:
         [
             (
                 "Comme il est mentionné dans le code de la consommation article 238-4 alinéa 2.",
-                ["Code de la consommation", "238-4"],
+                "code_article",
+                ("CCONSO", "Code de la consommation", "238-4"),
             ),
             (
-                "Comme il est mentionné dans  le C.conso. art.238-4 alinéa 2  qui blablabla",
-                ["Code de la consommation", "238-4"],
+                "Comme il est mentionné dans  le C.conso. art.238 alinéa 2  qui blablabla",
+                "article_code",
+                ("CCONSO", "Code de la consommation", "238"),
             ),
             (
                 "Code de l'Environnement Art. 2-3-4",
-                ["Code de l'environnement", "2-3-4"],
+                "code_article",
+                ("CENV", "Code de l'environnement", "2-3-4"),
             ),
-            ("CE. Art. R2-3-4", ["Code de l'environnement", "R2-3-4"]),
-            ("\n-\n  cjaaa article L.278 ", ["Code de justice administrative", "L278"]),
+            ("CE. Art. R2-3-4", "code_article",("CENV", "Code de l'environnement", "R2-3-4")),
             (
-                "C. assur. Art. L. 385-2, R. 343-4 et A421-13",
-                [
-                    ["Code des assurances", "L385-2"],
-                    ["Code des assurances", "R343-4"],
-                    ["Code des assurances", "A421-13"],
-                ],
+                "\n-\n  cjaaa article L.278 ",
+                "code_article",
+                ("CJA", "Code de justice administrative", "L278"),
             ),
+            
         ],
     )
     def test_matching_result_item_reversed_pattern(self, input_expected):
-        input, expected = input_expected
-        for item in get_matching_result_item(input, [], "code_article"):
+        input, pattern_format, expected = input_expected
+        for item in get_matching_result_item(input, None, pattern_format):
             assert item == expected, item
 
     def test_matching_result_dict_codes_no_filter_pattern_article_code(self):
@@ -109,7 +238,7 @@ class TestMatching:
             )
             full_text = parse_doc(abspath)
             restored_abspath = restore_test_file(file_path)
-            results_dict = get_matching_results_dict(full_text, None, "article_code")
+            results_dict = get_matching_results_dict(full_text, None)
 
             # del code_reference_test["CPCE"]
             code_list = list(results_dict.keys())
@@ -177,7 +306,7 @@ class TestMatching:
             full_text = parse_doc(abspath)
             restore_test_file(file_path)
             results_dict = get_matching_results_dict(
-                full_text, selected_codes, "article_code"
+                full_text, selected_codes
             )
             code_list = list(results_dict.keys())
             assert len(code_list) == len(selected_codes), len(code_list)
@@ -203,7 +332,7 @@ class TestMatching:
             full_text = parse_doc(abspath)
             restore_test_file(file_path)
             results_dict = get_matching_results_dict(
-                full_text, selected_codes, "article_code"
+                full_text, selected_codes
             )
             code_list = list(results_dict.keys())
             assert len(code_list) == len(selected_codes), len(code_list)
@@ -264,14 +393,14 @@ class TestMatching:
         # del code_reference_test["CPCE"]
 
         chunk = "C’est la solution posée dans le Code civil article 1120"
-        for item in get_matching_result_item(chunk):
+        for item in get_matching_result_item(chunk, None):
             assert item == ("Code civil", "1120"), item
         for code, item in get_matching_results_dict(chunk):
             assert code == "Code civil"
             assert item == "1120"
 
         multi_chunk = "C’est la solution posée dans le Code civil article 1120 et de C. civ. art. 2288"
-        for i, item in enumerate(get_matching_result_item(multi_chunk)):
+        for i, item in enumerate(get_matching_result_item(multi_chunk, None)):
             if i == 0:
                 assert item == ("Code civil", "1120"), item
             else:
@@ -289,7 +418,7 @@ class TestMatching:
             )
             full_text = parse_doc(abspath)
             restored_abspath = restore_test_file(file_path)
-            results_dict = get_matching_results_dict(full_text, None, "article_code")
+            results_dict = get_matching_results_dict(full_text, None)
             assert sorted(list(results_dict.keys())) == sorted(
                 code_reference_test_002
             ), sorted(code_reference_test_002)
@@ -306,8 +435,4 @@ class TestMatching:
                 "349",
                 "39999",
             ], results_dict["CCIV"]
-            # assert results_dict["CASSUR"] == ["L385-2", "R343-4", "A421-13"], results_dict[
-            #     "CASSUR"
-            # ]
-            # assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
-            # assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
+            

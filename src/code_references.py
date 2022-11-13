@@ -11,21 +11,21 @@ from typing import Any, Tuple, Union
 
 CODE_REGEX = {
     "CCIV": r"(?P<CCIV>Code\scivil|C\.\s?civ\.|Code\sciv\.|civ\.|CCIV)",
-    "CPRCIV": r"(?P<CPRCIV>Code\sde\sprocédure\scivile|C\.\spr\.\sciv\.|CPC)",
+    "CPRCIV": r"(?P<CPRCIV>Code\sde\sprocédure\scivile|C\.\s?pr\.\s?civ\.|CPC)",
     "CCOM": r"(?P<CCOM>Code\sd(e|u)\scommerce|C\.\scom\.)",
     "CTRAV": r"(?P<CTRAV>Code\sdu\stravail|C\.\strav\.)",
     "CPI": r"(?P<CPI>Code\sde\sla\spropriété\sintellectuelle|CPI|C\.\spr\.\sint\.)",
     "CPEN": r"(?P<CPEN>Code\sp(é|e)nal|C\.\s?p(é|e)n\.)",
     "CPP": r"(?P<CPP>Code\sde\sprocédure\spénale|CPP)",
-    "CASSUR": r"(?P<CASSUR>Code\sdes\sassurances|C\.\sassur\.)",
-    "CCONSO": r"(?P<CCONSO>Code\sde\sla\sconsommation|C\.\sconso\.)",
+    "CASSUR": r"(?P<CASSUR>Code\sdes\sassurances|C\.\s?assur\.)",
+    "CCONSO": r"(?P<CCONSO>Code\sde\sla\sconsommation|C\.\s?conso\.)",
     "CSI": r"(?P<CSI>Code\sde\slasécurité\sintérieure|CSI)",
-    "CSP": r"(?P<CSP>Code\sde\slasanté\spublique|C\.\ssant\.\spub\.|CSP)",
-    "CSS": r"(?P<CSS>Code\sde\slasécurité\ssociale|C\.\ssec\.\ssoc\.|CSS)",
+    "CSP": r"(?P<CSP>Code\sde\slasanté\spublique|C\.\s?sant\.\spub\.|CSP)",
+    "CSS": r"(?P<CSS>Code\sde\slasécurité\ssociale|C\.\s?sec\.\ssoc\.|CSS)",
     "CESEDA": r"(?P<CESEDA>Code\sde\sl'entrée\set\sdu\sséjour\sdes\sétrangers\set\sdu\sdroit\sd'asile|CESEDA)",
     "CGCT": r"(?P<CGCT>Code\sgénéral\sdes\scollectivités\sterritoriales|CGCT)",
     "CPCE": r"(?P<CPCE>Code\sdes\spostes\set\sdes\scommunications\sélectroniques|CPCE)",
-    "CENV": r"(?P<CENV>Code\sde\sl'environnement|C.\senvir.|CE\.)",
+    "CENV": r"(?P<CENV>Code\sde\sl'environnement|C.\s?envir.|CE\.)",
     "CJA": r"(?P<CJA>Code\sde\sjustice\sadministrative|CJA)",
 }
 

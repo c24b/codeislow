@@ -17,8 +17,8 @@ from code_references import (
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
 COMPILED_ARTICLE = re.compile(ARTICLE_REGEX, re.I)
-ARTICLE_REF = r"\d+"
-ARTICLE_NUM = r"(?P<ref>.*?\d{1,4}(.?-\d{1,4}.?)?)"
+# ARTICLE_REF = r"\d+"
+# ARTICLE_NUM = r"(?P<ref>.*?\d{1,4}(.?-\d{1,4}.?)?)"
 
 
 def detect_format_pattern(full_text):
@@ -39,11 +39,10 @@ def detect_format_pattern(full_text):
     code_regex = filter_code_regex(None)
     if re.search(re.compile(f"{code_regex}", flags=re.I), split_text[0]):
 
-        print("found", split_text[0])
         return "code_article"
     else:
-        return "article_code"   
-        
+        return "article_code"
+
 
 def switch_pattern(selected_codes=None, pattern="article_code"):
     """
@@ -78,12 +77,43 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
             f"({ARTICLE_REGEX})" + r"?.*?(?P<ref>.*\d*)", flags=re.I
         )
 
+def get_code_refs(full_text, pattern_format, selected_codes):
+    """
+    Fonction qui en fonction du format de références 
+    et des codes à detecter renvoie le code (abbréviation), 
+    le nom complet du code et la référence de l'article
+    
+    Arguments
+    =========
+    full_text: str
+        le texte complet du document
+    pattern_format: str
+        le format de références article code ou code article
+    select_codes: list
+        liste des codes à detecter
+    Yields
+    ======
+        code: str
+            l'abbréviation du code
+        long_code: str
+            le nom complet du code
+        ref: le numéro de l'article
+    """
+    # Force to detect every code
+    
+    article_pattern = switch_pattern(None, pattern_format)
 
-def get_code_refs_reversed_pattern(full_text, pattern_regex, selected_codes):
+    if article_pattern == "article_code":
+        return get_code_refs_article_code(full_text,article_pattern, selected_codes)
+    else:
+        print(len(article_pattern))
+        return get_code_refs_code_article(full_text,article_pattern, selected_codes)
+
+def get_code_refs_code_article(full_text, pattern_regex, selected_codes):
+    '''
+    Detection des articles selon le motif code article 
+    '''
     code_regex, article_regex = pattern_regex
-    # code_regex = filter_code_regex(None)
-    # code_regex = re.compile(f"{code_regex}", flags=re.I)
-    # article_regex = re.compile(f"{ARTICLE_REGEX}.*?(?P<ref>.*\d*)", flags=re.I)
     selected_codes = filter_code_reference(selected_codes)
     code_list = []
     code_name_list = []
@@ -104,14 +134,16 @@ def get_code_refs_reversed_pattern(full_text, pattern_regex, selected_codes):
         if i + 1 == len(code_name_list):
             text_by_codes.append(chunk1)
     for code, chunk_text in zip(code_list, text_by_codes):
+        long_code = get_code_full_name_from_short_code(code)
         for match in re.finditer(article_regex, chunk_text):
             if code in list(selected_codes):
-                match = match.group("ref").strip()
-                if match != "":
-                    yield code, get_code_full_name_from_short_code(code), match
+                art_num = match.group("ref").strip()
+                if art_num != "":
+                    for art_nb in normalize_references(art_num):
+                        yield code, long_code, art_nb
 
 
-def get_code_refs_classical_pattern(
+def get_code_refs_article_code(
     full_text: str, article_pattern: str, selected_codes: list
 ):
 
@@ -123,34 +155,52 @@ def get_code_refs_classical_pattern(
         # msg = f"#{i+1}\t{qualified_needle}"
         # print(msg)
         # logging.debug(msg)
-        # get the code shortname based on regex group name <code>
+        # get the code shortname based on regex group name (P?<code>)
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
         if code in selected_codes:
-            match = match.group("ref").strip()
-            if match != "":
-                yield code, get_code_full_name_from_short_code(code), match
+            long_code = get_code_full_name_from_short_code(code)
+            art_num = match.group("ref").strip()
+            if art_num != "":
+                for art_nb in normalize_references(art_num):
+                    yield code, long_code, art_nb
+                
 
+   
 
-def get_code_refs(full_text, pattern_format, selected_codes):
-    # Force to detect every article of every code
-    article_pattern = switch_pattern(None, pattern_format)
-    if pattern_format == "article_code":
-        return get_code_refs_classical_pattern(
-            full_text, article_pattern, selected_codes
-        )
-    else:
-        return get_code_refs_reversed_pattern(
-            full_text, article_pattern, selected_codes
-        )
+def normalize_references(ref: str) -> list:
+    """
+    Normaliser les références aux articles: nettoyer,
+    supprimer les mentions aux alineas,
+    séparer les mentions à plusieurs articles,
+    supprimer les tirets en trop, en double, en début ou en fin
+    ou en séparation entre une lettre et un nombre
+    supprimer les lettres différentes de L,A,R ou D
+    supprimer toutes celles qui ne sont pas en 1ere position
 
-
-def normalize_references(ref):
+    Arguments:
+    =========
+    ref: string
+        une chaine de caractère qui contient une ou plusieurs références
+    Returns:
+    =======
+    normalized_references: list
+        une liste contenant les références aux articles mentionnés dans le text
+    """
+    if ref == "" or ref is None:
+        return None
+    normalized_refs = []
+    # remove article mention just in case
+    clean_ref = re.sub(COMPILED_ARTICLE, "", ref)
+    # re.sub(COMPILED_ARTICLE, ref)
+    clean_refs = re.split(r"\s?(al\.|alin(e|é)a)\s?", clean_ref)
+    ref = clean_refs[0]
     # split multiple articles of a same code
     refs = [
         n
         for n in re.split(r"(\set\s|,\s|\sdu)", ref)
         if n not in [" et ", ", ", " du", " ", ""]
     ]
+
     # normalize articles to remove dots, spaces, caret and 'alinea'
     # with keeping only accepted caracters for article
     # i.e. numbers, (L|A|R|D) and caret
@@ -166,29 +216,36 @@ def normalize_references(ref):
         for ref in refs
     ]
 
-    normalized_refs = []
     for ref in refs:
         ref = "".join([r for r in ref if r.isdigit() or r in ["L", "A", "R", "D", "-"]])
-        ref = re.sub(r"-{2,}", "", ref)
+        ref = re.sub(r"-{2,}", "", ref).strip()
+        if ref == "":
+            continue
+        if ref.startswith("-"):
+            ref = ref[1:]
         # remove first caret -2323 => 2323
+        if ref.startswith("-"):
+            ref = ref[1:]
         if ref.endswith("-"):
             ref = ref[:-1]
-        if ref.startswith("-"):
+        # remove if last is not a digit
+        if not ref[-1].isdigit():
+            ref = ref[:-1]
+        # remove first if more than one letter at the beginning
+        if not ref[0].isdigit() and ref[1] in ["L", "A", "R", "D"]:
             ref = ref[1:]
         # remove caret separating article nb between first letter
         # exemple: L-248-1 = > L248-1
         special_ref = ref.split("-", 1)
         if special_ref[0] in ["L", "A", "R", "D"]:
-            normalized_refs.append("".join(special_ref))
-
-        else:
-            if ref not in ["", " "]:
-                normalized_refs.append(ref)
+            ref = "".join(special_ref)
+        if ref not in ["", " "]:
+            normalized_refs.append(ref)
     return normalized_refs
 
 
 def get_matching_results_dict(
-    full_text, selected_short_codes=[], pattern_format="article_code"
+    full_text, selected_short_codes=[], pattern_format=None
 ):
     """
     Une fonction qui renvoie un dictionnaire de resultats:
@@ -208,29 +265,25 @@ def get_matching_results_dict(
         a dict compose of short version of code as key and list of the detected articles references  as values {code: [art_ref, art_ref2, ... ]}
     """
     selected_codes = filter_code_reference(selected_short_codes)
-
+    if pattern_format is None:
+        pattern_format = detect_format_pattern(full_text)
     code_found = {}
-    # normalisation
-    # full_text = re.sub(
-    #     r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    # )
     for short_code, code, ref in get_code_refs(
         full_text, pattern_format, selected_codes
     ):
         if short_code not in code_found:
             # append article references
-            code_found[short_code] = normalize_references(ref)
+            code_found[short_code] = [ref]
         else:
             # append article references to existing list
-            code_found[short_code].extend(normalize_references(ref))
+            code_found[short_code].extend(ref)
     return code_found
 
 
 def get_matching_result_item(
-    full_text, selected_shortcodes=[], pattern_format="article_code"
-):
-    """ "
-    Renvoie les références des articles détectés dans le texte
+    full_text, selected_shortcodes=None, pattern_format=None):
+    """ 
+    Renvoie les références des articles détectés dans le texte sous forme de générateur
 
     Arguments
     -----------
@@ -239,21 +292,21 @@ def get_matching_result_item(
     selected_shortcodes: array
         a list of selected codes in short format for filtering article detection. Default is an empty list (which stands for no filter)
     pattern_format: str
-    a string representing the pattern format article_code or code_article. Defaut to article_code
+        a string representing the pattern format article_code or code_article. Defaut to article_code
 
     Yields
     --------
     code_short_name:str
-
-    article_number:str
+        Abbréviation du code
+    code:str
+        Nom complet du code
+    article_numbers: list
+        Liste des numéros d'articles
     """
     selected_codes = filter_code_reference(selected_shortcodes)
-
-    # full_text = re.sub(
-    #     r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    # )
-    for short_code, code, refs in get_code_refs(
+    if pattern_format is None:
+        pattern_format = detect_format_pattern(full_text)
+    for short_code, code, ref in get_code_refs(
         full_text, pattern_format, selected_codes
     ):
-        for ref in normalize_references(refs):
-            yield (short_code, code, ref)
+        yield(short_code, code, ref)

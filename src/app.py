@@ -16,8 +16,8 @@ from codeislow import load_result
 from result_templates import start_results, end_results
 
 app = Bottle()
-
-environment = Environment(loader=FileSystemLoader("./templates/"))
+curr_dir = os.path.dirname(os.path.realpath(__file__))
+environment = Environment(loader=FileSystemLoader(os.path.join(curr_dir, "templates/")))
 
 
 @app.route("/")
@@ -116,4 +116,4 @@ if __name__ == "__main__":
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
     else:
-        app.run(host="localhost", port=8080, debug=True, reloader=True)
+        app.run(host="localhost", port=8080, debug=False, reloader=True)

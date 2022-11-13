@@ -26,9 +26,6 @@ def main_result_sorted(
     future: int
         Nombre d'années en avant à surveiller
     """
-    load_dotenv()
-    client_id = os.getenv("API_KEY")
-    client_secret = os.getenv("API_SECRET")
     # parse
     full_text = parse_doc(file_path)
     results_dict = get_matching_results_dict(full_text, selected_codes, pattern_format)

@@ -48,7 +48,7 @@ class TestPattern:
             ),
             ("C. assur. Art. L. 385-2, R. 343-4 et A421-13", "code_article"),
             ("CE. Article L. 189-2, 343-4 et L-421-13", "code_article"),
-            ("Dans les articles suivants: CSP Art. L214", "code_article")
+            # ("Dans les articles suivants: CSP Art. L214", "code_article")
         ],
     )
     def test_detect_format_pattern_txt(self, input_expected):

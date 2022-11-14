@@ -38,14 +38,15 @@ def detect_format_pattern(full_text):
     Notes
     ------
 
-    Detection pas suffisantes pour le cas: "dans les articles suivants: CSI Art. L217-12"
+    Detection pas suffisantes pour le cas ou "dans les articles suivants: CSI Art. L217-12"
     """
 
     split_text = re.split(COMPILED_ARTICLE, full_text)
     # print(len(split_text))
     code_regex = filter_code_regex(None)
     if re.search(re.compile(f"{code_regex}", flags=re.I), split_text[0]):
-        # if re.search(re.compile("\d+"), split_text[0]):
+        # if re.search(re.compile("\d+"), split_text[1]):
+        #     print(split_text[1])
         return "code_article"
     else:
         return "article_code"

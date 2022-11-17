@@ -9,6 +9,7 @@ Load document with the accepted extensions and transform into list of text
 """
 
 import os
+import re
 import docx
 from PyPDF2 import PdfReader
 from odf import text, teletype
@@ -65,6 +66,8 @@ def parse_doc(file_path: str) -> list:
             paragraphs = document.paragraphs
             for i in range(len(paragraphs)):
                 full_text.append((paragraphs[i].text))
-    full_text = [n for n in full_text if n not in ["\n", "", " "]]
     os.remove(file_path)
-    return full_text
+    full_text = [n for n in full_text if n not in ["\n", "", " "]]
+    return re.sub(
+        r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
+    )

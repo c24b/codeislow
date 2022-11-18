@@ -1,29 +1,38 @@
 # DEPLOYER LE PROJET
 
-Instructions pour déployer le projet sur un serveur. 
+Instructions pour déployer le projet sur un serveur Debian. 
 
 ## Copier les sources sur le serveur
 
+- Depuis github:
 
-> Notez bien l'endroit où les sources sont installées!
+git clone git@github.com:c24b/codeislow.git
 
-scp -r codeislaw/ root@remotesrv:/
+- Depuis votre ordinateur personnel
 
-> Pensez bien à envoyer aussi le fichier .env
-> Et eventuellement le virtualenv .venv
+scp -r ~/codeislow/ root@srv:/
 
-## Se Connecter au serveur et installer le projet
+> Notez bien le chemin absolu ou les sources sont installées sur le serveur!
+
+## Installer l'environnement virtuel
 
 
+## Créer un fichier .env
+A partir du fichier dotenv.example
+
+```
+API_KEY=
+API_SECRET=
+APP_HOST=
+APP_PORT=
+```
 ## Configurer le serveur http avec GUNICORN
 
-Activer l'environnement virtuel
+Dans l'environnement virtuel
 
 pip install gunicorn
 
-gunicorn_config.py
-bind = "0.0.0.0:8080"
-workers = 2
+
 
 
 ## Activer le service avec Systemd

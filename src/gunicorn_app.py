@@ -117,6 +117,6 @@ if __name__ == "__main__":
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
     else:
-        app.run(host=os.environ.get("APP_HOST"), port=os.environ.get("APP_HOST"), server=os.environ.get("APP_LOCATION"), debug=os.environ.get("DEBUG"), reloader=os.environ.get("RELOAD"), workers=4)
+        app.run(host=os.environ.get("APP_HOST"), port=os.environ.get("APP_PORT"), server=os.environ.get("APP_LOCATION"), debug=os.environ.get("DEBUG"), reloader=os.environ.get("RELOAD"), workers=4)
 
 app = bottle.default_app()

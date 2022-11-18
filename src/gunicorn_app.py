@@ -6,7 +6,7 @@ Main Bottle app
 
 """
 import os
-
+from dotenv import load_dotenv
 from bottle_sslify import SSLify
 import bottle
 from bottle import Bottle, request
@@ -111,6 +111,7 @@ def upload():
 
 
 if __name__ == "__main__":
+    load_dotenv()
     if os.environ.get("APP_LOCATION") == "heroku":
         SSLify(app)
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

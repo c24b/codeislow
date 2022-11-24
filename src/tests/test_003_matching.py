@@ -13,7 +13,7 @@ from matching import (
 from .test_001_parsing import restore_test_file, archive_test_file
 
 
-class TestMatching:
+class TestPattern:
     def test_switch_pattern_wrong_pattern(self):
         with pytest.raises(ValueError) as e:
             switch_pattern(None, "code_code")
@@ -27,7 +27,6 @@ class TestMatching:
         pattern_code, pattern_article = switch_pattern(None, "code_article")
         assert repr(pattern_code).startswith("re.compile("), repr(pattern_code)
         assert repr(pattern_article).startswith("re.compile("), repr(pattern_article)
-
     @pytest.mark.parametrize(
         "input_expected",
         [
@@ -58,11 +57,12 @@ class TestMatching:
             ),
         ],
     )
-    def test_matching_result_item(self, input_expected):
+    def test_normalize_article_code(self, input_expected):
         input, expected = input_expected
         for item in get_matching_result_item(input):
             assert item == expected, item
 
+class TestMatching:
     @pytest.mark.parametrize(
         "input_expected",
         [
@@ -90,12 +90,12 @@ class TestMatching:
             ),
         ],
     )
-    def test_matching_result_item_reversed_pattern(self, input_expected):
+    def test_text_pattern_code_article(self, input_expected):
         input, expected = input_expected
         for item in get_matching_result_item(input, [], "code_article"):
             assert item == expected, item
 
-    def test_matching_result_dict_codes_no_filter_pattern_article_code(self):
+    def test_doc_pattern_article_code(self):
         # NO CPCE ref dans le doc
         code_reference_test = CODE_REFERENCE
         del code_reference_test["CPCE"]
@@ -166,7 +166,7 @@ class TestMatching:
                 results_dict["CESEDA"],
             )
 
-    def test_matching_result_dict_codes_unique_filter_pattern_article_code(self):
+    def test_doc_pattern_article_code_filter1(self):
         selected_codes = ["CASSUR"]
         file_paths = ["newtest.odt", "newtest.docx", "newtest.pdf"]
         for file_path in file_paths:
@@ -192,7 +192,7 @@ class TestMatching:
                 "A421-13",
             ], results_dict["CASSUR"]
 
-    def test_matching_result_dict_codes_multiple_filter_pattern_article_code(self):
+    def test_doc_pattern_article_code_filterX(self):
         selected_codes = ["CASSUR", "CENV", "CSI", "CCIV"]
         file_paths = ["newtest.odt", "newtest.docx", "newtest.pdf"]
         for file_path in file_paths:
@@ -240,7 +240,7 @@ class TestMatching:
             assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
             assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
 
-    def test_get_code_refs_reversed_pattern(self):
+    def test_text_pattern_code_article_ref1(self):
         full_text = (
             "CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
         )
@@ -250,7 +250,7 @@ class TestMatching:
         ]
         assert len(results) == 3, results
 
-    def test_get_code_refs_reversed_pattern_001(self):
+    def test_text_pattern_code_article_refx(self):
         full_text = "Comme on peut le voir dans CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
 
         results = [
@@ -258,7 +258,7 @@ class TestMatching:
         ]
         assert len(results) == 3, results
 
-    def test_matching_result_dict_codes_no_filter_reversed_pattern_paragraphs(self):
+    def test_text_pattern_code_article_ref1x(self):
         # NO CPCE ref dans le doc
         code_reference_test = CODE_REFERENCE
         # del code_reference_test["CPCE"]
@@ -277,8 +277,7 @@ class TestMatching:
             else:
                 assert item == ("Code civil", "2288"), item
 
-    def test_matching_result_dict_codes_no_filter_pattern_code_article(self):
-
+    def test_doc_pattern_code_article(self):
         code_reference_test_002 = CODE_REFERENCE
         file_paths = ["testnew.odt", "testnew.pdf", "testnew.docx"]
         for file_path in file_paths:
@@ -311,3 +310,29 @@ class TestMatching:
             # ]
             # assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
             # assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
+    
+    def test_doc_article_code(self):
+        file_path = "HDR_NETTER_V1_07.odt"
+        tmp_abspath = archive_test_file(file_path)
+        abspath = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), file_path
+        )
+        full_text = parse_doc(abspath)
+        restored_abspath = restore_test_file(file_path)
+        
+        results_dict = get_matching_results_dict(full_text, None, "article_code")
+        assert sorted(results_dict) == sorted(['CASSUR', 'CENV', 'CCIV', 'CSS', 'CPEN', 'CPI', 'CPP', 'CCONSO', 'CTRAV', 'CPRCIV', 'CSP', 'CCOM']), results_dict
+        assert False, results_dict["CASSUR"]
+        
+    def test_doc_code_article(self):
+        file_path = "HDR_NETTER_V1_07.odt"
+        tmp_abspath = archive_test_file(file_path)
+        abspath = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), file_path
+        )
+        full_text = parse_doc(abspath)
+        restored_abspath = restore_test_file(file_path)
+        
+        results_dict = get_matching_results_dict(full_text, None, "code_article")
+        assert sorted(results_dict) == sorted(['CASSUR', 'CENV', 'CCIV', 'CSS', 'CPEN', 'CPI', 'CPP', 'CCONSO', 'CTRAV', 'CPRCIV', 'CSP', 'CCOM']), results_dict
+        assert False, results_dict.items()

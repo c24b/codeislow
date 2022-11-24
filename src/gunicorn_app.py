@@ -70,6 +70,14 @@ def upload():
         return "Le format du fichier est incorrect"
     file_path = os.path.join("tmp", upload.filename)
     upload.save(file_path)
+    yield """
+    <div id="processing" class="alert alert-info" role="alert">
+        <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        Traitement et détection des articles en cours...<br>Veuillez patientez...
+    </div>
+    """
     past = int(request.forms.get("user_past"))
     future = int(request.forms.get("user_future"))
     selected_codes = [
@@ -79,11 +87,7 @@ def upload():
     ]
     if len(selected_codes) == 0:
         selected_codes = None
-    yield """<div id="processing" class="alert alert-info" role="alert">
-    <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
-  <span aria-hidden="true">&times;</span>
-</button>Traitement et détection des articles en cours...<br>Veuillez patientez...</div>
-"""
+    
     yield start_results
 
     try:
@@ -99,16 +103,9 @@ def upload():
         </div>
         """
         yield row
-    #     row = f'''
-    #         <tr scope="row"><a href='{article["url"]}'>{article["code"]} - {article["article"]}</a></tr>
-    #         <tr>{article["status"]}</tr>
-    #         <tr>{article["texte"]}</tr>
-    #         <tr></tr>
-    #     '''
-    # yield
+    
 
     yield end_results
-
 
 if __name__ == "__main__":
     load_dotenv()
@@ -117,6 +114,6 @@ if __name__ == "__main__":
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
     else:
+        SSLify(app)
         app.run(host=os.environ.get("APP_HOST"), port=os.environ.get("APP_PORT"), server=os.environ.get("APP_LOCATION"), debug=os.environ.get("DEBUG"), reloader=os.environ.get("RELOAD"), workers=4)
 
-app = bottle.default_app()

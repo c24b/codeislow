@@ -30,7 +30,7 @@ def main_result_sorted(
     full_text = parse_doc(file_path)
     results_dict = get_matching_results_dict(full_text, selected_codes, pattern_format)
     if len(results_dict) == 0:
-        raise ValueError("ERROR: pas d'article detecté....")
+        raise ValueError("ERREUR: pas d'article detecté....")
     else:
         return results_dict
 

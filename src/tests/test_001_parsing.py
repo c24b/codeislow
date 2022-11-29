@@ -65,13 +65,12 @@ class TestFileParsing:
             restore_test_file(file_path)
             doc_name, doc_ext = abspath.split("/")[-1].split(".")
             assert doc_name == "newtest" or doc_name == "testnew"
-            if abspath.endswith(".pdf"):
-                assert len(full_text) == 23, (len(full_text), abspath)
-            else:
-                assert len(full_text) == 22, (len(full_text), abspath)
-            assert any("art." in _x for _x in full_text) is True
-            assert any("Art." in _x for _x in full_text) is True
-            assert any("Code" in _x for _x in full_text) is True
+            # if abspath.endswith(".pdf"):
+            #     assert len(full_text) == 23, (len(full_text), abspath)
+            # else:
+            #     assert len(full_text) == 22, (len(full_text), abspath)
+            assert full_text.lower().count("art") > 1, full_text.count("art")
+            assert full_text.lower().count("code") > 1, full_text.count("code")
 
     def test_reversed_pattern_content(self):
         """test content text"""
@@ -85,13 +84,12 @@ class TestFileParsing:
             restore_test_file(file_path)
             doc_name, doc_ext = abspath.split("/")[-1].split(".")
             assert doc_name == "newtest" or doc_name == "testnew"
-            if abspath.endswith(".pdf"):
-                assert len(full_text) == 24, (len(full_text), abspath)
-            else:
-                assert len(full_text) == 22, (len(full_text), abspath)
-            assert any("art." in _x for _x in full_text) is True
-            assert any("Art." in _x for _x in full_text) is True
-            assert any("Code" in _x for _x in full_text) is True
+            # if abspath.endswith(".pdf"):
+            #     assert len(full_text) == 24, (len(full_text), abspath)
+            # else:
+            #     assert len(full_text) == 22, (len(full_text), abspath)
+            assert full_text.lower().count("art") > 1, full_text.count("art")
+            assert full_text.lower().count("code") > 1, full_text.count("code")
 
     def test_HDR_document(self):
         file_path = "HDR_NETTER_V1_07.odt"
@@ -101,7 +99,5 @@ class TestFileParsing:
         restore_test_file(file_path)
         doc_name, doc_ext = abspath.split("/")[-1].split(".")
         assert doc_ext == "odt", doc_ext
-        assert len(full_text) == 3589, (len(full_text), abspath)
-        assert any("art." in _x for _x in full_text) is True
-        assert any("Art." in _x for _x in full_text) is True
-        assert any("Code" in _x for _x in full_text) is True
+        assert full_text.lower().count("art") > 1, full_text.count("art")
+        assert full_text.lower().count("code") > 1, full_text.count("code")

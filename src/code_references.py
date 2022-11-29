@@ -132,59 +132,52 @@ def get_short_code_from_full_name(full_name: str) -> str:
         return None
 
 
-def filter_code_regex(selected_codes: list) -> str:
-    """
+def get_selected_codes_regex(selected_codes: list) -> str:
+    '''
     Contruire l'expression régulière pour détecter les différents codes dans le document.
+    Selectionner les codes choisis parmi la liste des codes supportés
+    et renvoyer les regex correspondants. Si la liste est vide ou None:
+    l'intégralité des regex est renvoyée dans une regex composée. 
+    Si un seul code est selectionné, la regex renvoyée est simple.
 
     Arguments
-    ----------
+    ---------
     selected_codes: array
         [short_code, ...]. Default: None (no filter)
 
     Returns
     ----------
     regex: str
-        a regex expression to match codes
-    """
-    if selected_codes is None or len(selected_codes) == 0:
+        the corresponding regex string
+    '''
+    if selected_codes is None:
         return "({})".format("|".join(list(CODE_REGEX.values())))
-
     if len(selected_codes) == 1:
         try:
             return CODE_REGEX[selected_codes[0]]
         except KeyError:
-            return None
-    else:
-        selected_code_list = []
-        for x in sorted(selected_codes):
             try:
-                selected_code_list.append(CODE_REGEX[x])
-            except KeyError:
-                pass
-        return "({})".format("|".join(selected_code_list))
-
-
-def filter_code_reference(selected_codes: Union[None, list] = []) -> dict:
-    """
-    Filtrer le dictionnaire de référence des codes
-
-    Arguments
-    ----------
-    selected_codes: array
-        [short_code, ...]. Default None means no filter
-    Returns
-    ----------
-    code_reference_dict_filtered: dict
-        The CODE_REFERENCE filtered with only the selected codes
-    """
-    if selected_codes is None or len(selected_codes) == 0:
-        return CODE_REFERENCE
-    selected_code_refs = {}
-    for x in sorted(selected_codes):
+                #if short code not found: try from full_name
+                short_code = get_short_code_from_full_name(selected_codes[0])
+                return CODE_REGEX[short_code]
+            except:
+                #if not found return all codes
+                return "({})".format("|".join(list(CODE_REGEX.values())))
+    selected_code_regex = []
+    for x in selected_codes:
         try:
-            value = CODE_REFERENCE[x]
-            selected_code_refs[x] = value
+            selected_code_regex.append(CODE_REGEX[x])
         except KeyError:
-            pass
+            try:
+                #if short code not found: try from full_name
+                short_code = get_short_code_from_full_name(x)
+                selected_code_regex.append(CODE_REGEX[short_code])
+            except Exception:
+                pass
+    #if nothing selected: return all
+    if selected_codes is None or len(selected_codes) == 0 or len(selected_code_regex) == 0:
+        selected_code_regex = CODE_REGEX.values()
+    return "({})".format("|".join(selected_code_regex))
 
-    return selected_code_refs
+
+

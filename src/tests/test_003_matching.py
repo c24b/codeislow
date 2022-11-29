@@ -2,6 +2,7 @@ import os
 import pytest
 import re
 from .context import matching, parsing, code_references
+import difflib
 from parsing import parse_doc
 from code_references import CODE_REFERENCE
 from matching import (
@@ -9,6 +10,7 @@ from matching import (
     get_matching_result_item,
     switch_pattern,
     get_code_refs,
+    normalize_references
 )
 from .test_001_parsing import restore_test_file, archive_test_file
 
@@ -18,51 +20,127 @@ class TestPattern:
         with pytest.raises(ValueError) as e:
             switch_pattern(None, "code_code")
             assert e.info_msg == "", e
-
+   
     def test_switch_pattern_classical_pattern(self):
-        pattern = switch_pattern(None, "article_code")
-        assert repr(pattern).startswith("re.compile("), repr(pattern)
+        expected = "(?P<art>(Articles?|Art\.)).*?(?P<ref>(L|A|R|D)?\.?\s?\d{1,5}(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?.*?(\d{1,5})?)((?P<CCIV>Code\scivil|C\.\s?civ\.|Code\sciv\.|civ\.|CCIV)|(?P<CPRCIV>Code\sde\sprocédure\scivile|C\.\spr\.\sciv\.|CPC)|(?P<CCOM>Code\sd(e|u)\scommerce|C\.\scom\.)|(?P<CTRAV>Code\sdu\stravail|C\.\strav\.)|(?P<CPI>Code\sde\sla\spropriété\sintellectuelle|CPI|C\.\spr\.\sint\.)|(?P<CPEN>Code\sp(é|e)nal|C\.\s?p(é|e)n\.)|(?P<CPP>Code\sde\sprocédure\spénale|CPP)|(?P<CASSUR>Code\sdes\sassurances|C\.\sassur\.)|(?P<CCONSO>Code\sde\sla\sconsommation|C\.\sconso\.)|(?P<CSI>Code\sde\slasécurité\sintérieure|CSI)|(?P<CSP>Code\sde\slasanté\spublique|C\.\ssant\.\spub\.|CSP)|(?P<CSS>Code\sde\slasécurité\ssociale|C\.\ssec\.\ssoc\.|CSS)|(?P<CESEDA>Code\sde\sl'entrée\set\sdu\sséjour\sdes\sétrangers\set\sdu\sdroit\sd'asile|CESEDA)|(?P<CGCT>Code\sgénéral\sdes\scollectivités\sterritoriales|CGCT)|(?P<CPCE>Code\sdes\spostes\set\sdes\scommunications\sélectroniques|CPCE)|(?P<CENV>Code\sde\sl'environnement|C.\senvir.|CE\.)|(?P<CJA>Code\sde\sjustice\sadministrative|CJA))"
+        regex_pattern = switch_pattern(None, "article_code")
+        assert regex_pattern == expected, list(difflib.ndiff(expected, regex_pattern))
+        assert "Code" in regex_pattern, regex_pattern
+        assert "Article" in regex_pattern, regex_pattern
+        art_posx, art_posy = re.search("<art>", str(regex_pattern)).span(0)
+        code_posx, code_posy = re.search("Code", str(regex_pattern)).span(0)
+        assert (art_posx, art_posy) < (code_posx, code_posy),  ("Art:",(art_posx, art_posy), "Code:", (code_posx, code_posy))
+        # assert False, re.search("Code", str(regex_pattern)).span(0)
+    
+    def test_switch_pattern_reversed_pattern(self):
+        expected = "((?P<CCIV>Code\scivil|C\.\s?civ\.|Code\sciv\.|civ\.|CCIV)|(?P<CPRCIV>Code\sde\sprocédure\scivile|C\.\spr\.\sciv\.|CPC)|(?P<CCOM>Code\sd(e|u)\scommerce|C\.\scom\.)|(?P<CTRAV>Code\sdu\stravail|C\.\strav\.)|(?P<CPI>Code\sde\sla\spropriété\sintellectuelle|CPI|C\.\spr\.\sint\.)|(?P<CPEN>Code\sp(é|e)nal|C\.\s?p(é|e)n\.)|(?P<CPP>Code\sde\sprocédure\spénale|CPP)|(?P<CASSUR>Code\sdes\sassurances|C\.\sassur\.)|(?P<CCONSO>Code\sde\sla\sconsommation|C\.\sconso\.)|(?P<CSI>Code\sde\slasécurité\sintérieure|CSI)|(?P<CSP>Code\sde\slasanté\spublique|C\.\ssant\.\spub\.|CSP)|(?P<CSS>Code\sde\slasécurité\ssociale|C\.\ssec\.\ssoc\.|CSS)|(?P<CESEDA>Code\sde\sl'entrée\set\sdu\sséjour\sdes\sétrangers\set\sdu\sdroit\sd'asile|CESEDA)|(?P<CGCT>Code\sgénéral\sdes\scollectivités\sterritoriales|CGCT)|(?P<CPCE>Code\sdes\spostes\set\sdes\scommunications\sélectroniques|CPCE)|(?P<CENV>Code\sde\sl'environnement|C.\senvir.|CE\.)|(?P<CJA>Code\sde\sjustice\sadministrative|CJA)).*?(?P<art>(Articles?|Art\.)).*?(?P<ref>(L|A|R|D)?\.?\s?\d{1,5}(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?.*?(\d{1,5})?)"
+        regex_pattern = switch_pattern(None, "code_article")
+        assert regex_pattern == expected, list(difflib.ndiff(expected, regex_pattern))
+        assert "Code" in regex_pattern, regex_pattern
+        assert "Article" in regex_pattern, regex_pattern
+        art_posx, art_posy = re.search("<art>", regex_pattern).span(0)
+        code_posx, code_posy = re.search("Code", regex_pattern).span(0)
+        assert (art_posx, art_posy) > (code_posx, code_posy),  ("Art:",(art_posx, art_posy), "Code:",(code_posx, code_posy))
 
-    def test_switch_pattern_reverse_pattern(self):
-        pattern_code, pattern_article = switch_pattern(None, "code_article")
-        assert repr(pattern_code).startswith("re.compile("), repr(pattern_code)
-        assert repr(pattern_article).startswith("re.compile("), repr(pattern_article)
+    
+class TestNormalize:
     @pytest.mark.parametrize(
         "input_expected",
         [
             (
-                "Comme il est mentionné dans l'article 238-4 alinéa 2 du code de la consommation .",
-                ["Code de la consommation", "238-4"],
+                "Comme il est mentionné dans l'article 238-4 alinéa 2",
+                ['238-4-2'],
             ),
             (
-                "Comme il est mentionné dans l'art.238-4 alinéa 2 du C.conso.",
-                ["Code de la consommation", "238-4"],
+                "Comme il est mentionné dans l'art.238-4 alinéa 2",
+                ['238-4-2'],
             ),
             (
-                "Art. 2-3-4 du Code de l'Environnement",
-                ["Code de l'environnement", "2-3-4"],
+                "Art. 2-3-4 ",
+                ["2-3-4"],
             ),
-            ("Art. R2-3-4 du CE.", ["Code de l'environnement", "R2-3-4"]),
+            (
+                "Art. R2-3-4", 
+                ["R2-3-4"]
+            ),
             (
                 "\n-\n article L.278 du cjaaa",
-                ["Code de justice administrative", "L278"],
+                ["L278"],
             ),
             (
-                "Art. L. 385-2, R. 343-4 et A421-13 du C. assur. ",
+                "Art. L. 385-2, R. 343-4 et A421-13",
                 [
-                    ["Code des assurances", "L385-2"],
-                    ["Code des assurances", "R343-4"],
-                    ["Code des assurances", "A421-13"],
+                    "L385-2",
+                    "R343-4",
+                    "A421-13",
                 ],
             ),
+            (
+                "Art. L. 112-3 al. 2",
+                ["L112-3"]
+            ),
+            (
+                "La Commission des clauses abusives rappelle « qu’un certain nombre de conditions générales de vente prévoient la possibilité pour le vendeur de refuser au consommateur, pour quelque raison que ce soit, la possibilité de confirmer l’acceptation de l’offre ; que ces clauses qui contreviennent à l’article L 122-1",
+                ["L122-1"]
+            )
         ],
     )
     def test_normalize_article_code(self, input_expected):
         input, expected = input_expected
-        for item in get_matching_result_item(input):
-            assert item == expected, item
+        results = normalize_references(input)
+        assert results == expected, (results, expected)
 
-class TestMatching:
+
+
+# class TestNormalize:
+#     @pytest.mark.parametrize(
+#         "input_expected",
+#         [
+#             (
+#                 "Comme il est mentionné dans l'article 238-4 alinéa 2 du code de la consommation .",
+#                 ["Code de la consommation", "238-4"],
+#             ),
+#             (
+#                 "Comme il est mentionné dans l'art.238-4 alinéa 2 du C.conso.",
+#                 ["Code de la consommation", "238-4"],
+#             ),
+#             (
+#                 "Art. 2-3-4 du Code de l'Environnement",
+#                 ["Code de l'environnement", "2-3-4"],
+#             ),
+#             (
+#                 "Art. R2-3-4 du CE.", 
+#                 ["Code de l'environnement", "R2-3-4"]
+#             ),
+#             (
+#                 "\n-\n article L.278 du cjaaa",
+#                 ["Code de justice administrative", "L278"],
+#             ),
+#             (
+#                 "Art. L. 385-2, R. 343-4 et A421-13 du C. assur. ",
+#                 [
+#                     ["Code des assurances", "L385-2"],
+#                     ["Code des assurances", "R343-4"],
+#                     ["Code des assurances", "A421-13"],
+#                 ],
+#             ),
+#             (
+#                 "Art. L. 112-3 al. 2 CPI.",
+#                 ["Code de la propriété intellectuelle", "L112-3"]
+#             ),
+#             (
+#                 "La Commission des clauses abusives rappelle « qu’un certain nombre de conditions générales de vente prévoient la possibilité pour le vendeur de refuser au consommateur, pour quelque raison que ce soit, la possibilité de confirmer l’acceptation de l’offre ; que ces clauses qui contreviennent à l’article L 122-1 du code de la consommation, sont illicites »",
+#                 ["Code de la consommation","L122-1"]
+#             )
+
+#         ],
+#     )
+#     def test_normalize_article_code(self, input_expected):
+#         input, expected = input_expected
+#         # for item in get_matching_result_item(input):
+#         #     assert item == expected, item
+
+class TestTextMatching:
     @pytest.mark.parametrize(
         "input_expected",
         [
@@ -94,7 +172,45 @@ class TestMatching:
         input, expected = input_expected
         for item in get_matching_result_item(input, [], "code_article"):
             assert item == expected, item
+    def test_text_pattern_code_article_ref1(self):
+        full_text = (
+            "CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
+        )
 
+        results = [
+            n for n in (get_code_refs(full_text, "code_article", selected_codes=None))
+        ]
+        assert len(results) == 3, results
+
+    def test_text_pattern_code_article_refx(self):
+        full_text = "Comme on peut le voir dans CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
+
+        results = [
+            n for n in (get_code_refs(full_text, "code_article", selected_codes=None))
+        ]
+        assert len(results) == 3, results
+
+    def test_text_pattern_code_article_ref1x(self):
+        # NO CPCE ref dans le doc
+        code_reference_test = CODE_REFERENCE
+        # del code_reference_test["CPCE"]
+
+        chunk = "C’est la solution posée dans le Code civil article 1120"
+        for item in get_matching_result_item(chunk):
+            assert item == ("Code civil", "1120"), item
+        for code, item in get_matching_results_dict(chunk):
+            assert code == "Code civil"
+            assert item == "1120"
+
+        multi_chunk = "C’est la solution posée dans le Code civil article 1120 et de C. civ. art. 2288"
+        for i, item in enumerate(get_matching_result_item(multi_chunk)):
+            if i == 0:
+                assert item == ("Code civil", "1120"), item
+            else:
+                assert item == ("Code civil", "2288"), item
+
+class TestDocMatching:
+    
     def test_doc_pattern_article_code(self):
         # NO CPCE ref dans le doc
         code_reference_test = CODE_REFERENCE
@@ -240,42 +356,7 @@ class TestMatching:
             assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
             assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
 
-    def test_text_pattern_code_article_ref1(self):
-        full_text = (
-            "CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
-        )
-
-        results = [
-            n for n in (get_code_refs(full_text, "code_article", selected_codes=None))
-        ]
-        assert len(results) == 3, results
-
-    def test_text_pattern_code_article_refx(self):
-        full_text = "Comme on peut le voir dans CSI Article LL22-7 et R314-7  Code de l'environnement L124-1 CJA L214-4"
-
-        results = [
-            n for n in (get_code_refs(full_text, "code_article", selected_codes=None))
-        ]
-        assert len(results) == 3, results
-
-    def test_text_pattern_code_article_ref1x(self):
-        # NO CPCE ref dans le doc
-        code_reference_test = CODE_REFERENCE
-        # del code_reference_test["CPCE"]
-
-        chunk = "C’est la solution posée dans le Code civil article 1120"
-        for item in get_matching_result_item(chunk):
-            assert item == ("Code civil", "1120"), item
-        for code, item in get_matching_results_dict(chunk):
-            assert code == "Code civil"
-            assert item == "1120"
-
-        multi_chunk = "C’est la solution posée dans le Code civil article 1120 et de C. civ. art. 2288"
-        for i, item in enumerate(get_matching_result_item(multi_chunk)):
-            if i == 0:
-                assert item == ("Code civil", "1120"), item
-            else:
-                assert item == ("Code civil", "2288"), item
+    
 
     def test_doc_pattern_code_article(self):
         code_reference_test_002 = CODE_REFERENCE

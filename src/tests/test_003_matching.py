@@ -48,27 +48,37 @@ class TestNormalize:
         "input_expected",
         [
             (
-                "Comme il est mentionné dans l'article 238-4 alinéa 2",
+                "238-4 al. 2",
                 ['238-4-2'],
             ),
             (
-                "Comme il est mentionné dans l'art.238-4 alinéa 2",
+                "238-4 alinéa 2",
                 ['238-4-2'],
             ),
             (
-                "Art. 2-3-4 ",
-                ["2-3-4"],
+                "2-3-4-5-6 alinéa 7 ",
+                ["2-3-4-5-6-7"],
             ),
             (
-                "Art. R2-3-4", 
+                "R2-3-4", 
                 ["R2-3-4"]
             ),
             (
-                "\n-\n article L.278 du cjaaa",
+                "\n-\n L.278",
                 ["L278"],
             ),
             (
-                "Art. L. 385-2, R. 343-4 et A421-13",
+                " L. 385-2, R. 343-4, D 419 et A421-13",
+                [
+                    "L385-2",
+                    "R343-4",
+                    "D419",
+                    "A421-13",
+                ],
+            ),
+
+            (
+                " L. 385-2, R. 343-4 et A421-13",
                 [
                     "L385-2",
                     "R343-4",
@@ -76,11 +86,11 @@ class TestNormalize:
                 ],
             ),
             (
-                "Art. L. 112-3 al. 2",
-                ["L112-3"]
+                "L. 112-3 al. 2",
+                ["L112-3-2"]
             ),
             (
-                "La Commission des clauses abusives rappelle « qu’un certain nombre de conditions générales de vente prévoient la possibilité pour le vendeur de refuser au consommateur, pour quelque raison que ce soit, la possibilité de confirmer l’acceptation de l’offre ; que ces clauses qui contreviennent à l’article L 122-1",
+                "L 122-1",
                 ["L122-1"]
             )
         ],

@@ -6,20 +6,17 @@ The matching module
 Ce module permet la detection des articles du code de droit français
 
 """
-import logging
+from logs import logger
 import re
 
 from code_references import (
-    filter_code_regex,
-    filter_code_reference,
+    get_selected_codes_regex,
     get_code_full_name_from_short_code,
+    CODE_REFERENCE
 )
 
 ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
-
-ARTICLE_REF = r"\d+"
-ARTICLE_NUM = r"(?P<ref>.*?\d{1,4}(.?-\d{1,4}.?)?)"
-
+#ARTICLE_NUM = r"(?P<ref>(L|A|R|D)?\.?\s?\d{1,5}(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?.*?(\d{1,5})?)"
 
 def switch_pattern(selected_codes=None, pattern="article_code"):
     """
@@ -41,85 +38,26 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
         pattern name is wrong
     """
 
-    code_regex = filter_code_regex(None)
-
+    
     if pattern not in ["article_code", "code_article"]:
         raise ValueError(
             "Wrong pattern name: choose between 'article_code' or 'code_article'"
         )
+    
+    code_regex = get_selected_codes_regex(selected_codes)
+    assert code_regex is not None or code_regex != ""
+
+    #default pattern is article_code
     if pattern == "article_code":
-        return re.compile(f"{ARTICLE_REGEX}(?P<ref>.*?){code_regex}", flags=re.I)
-    else:
-        return re.compile(f"{code_regex}", flags=re.I), re.compile(
-            f"({ARTICLE_REGEX})" + r"?.*?(?P<ref>.*\d*)", flags=re.I
-        )
+        # pattern_r = f"{ARTICLE_REGEX}.*?{ARTICLE_NUM}.*?d(u|e).*?{code_regex}"
+        pattern_r = f"{ARTICLE_REGEX}\s?(?P<ref>.*)du\s{code_regex}"
+        return pattern_r
+    if pattern == "code_article":
+        pattern_r = f"{code_regex}.*?{ARTICLE_REGEX}(?P<ref>.*?\d)$"
+        return pattern_r
 
-
-def get_code_refs_reversed_pattern(full_text, pattern_regex, selected_codes):
-    code_regex, article_regex = pattern_regex
-    # code_regex = filter_code_regex(None)
-    # code_regex = re.compile(f"{code_regex}", flags=re.I)
-    # article_regex = re.compile(f"{ARTICLE_REGEX}.*?(?P<ref>.*\d*)", flags=re.I)
-    selected_codes = filter_code_reference(selected_codes)
-    code_list = []
-    code_name_list = []
-    for i, match in enumerate(re.finditer(code_regex, full_text)):
-        needle = match.groupdict()
-        assert needle is not None, needle
-        for key, value in needle.items():
-            if value is not None and key in list(selected_codes):
-                code_list.append(key)
-                code_name_list.append(value)
-
-    text_by_codes = []
-    for i, item in enumerate(code_name_list):
-        chunk0, chunk1 = full_text.split(item, 1)
-        if i != 0:
-            text_by_codes.append(chunk0)
-        full_text = chunk1
-        if i + 1 == len(code_name_list):
-            text_by_codes.append(chunk1)
-    for code, chunk_text in zip(code_list, text_by_codes):
-        for match in re.finditer(article_regex, chunk_text):
-            if code in list(selected_codes):
-                match = match.group("ref").strip()
-                if match != "":
-                    yield code, get_code_full_name_from_short_code(code), match
-
-
-def get_code_refs_classical_pattern(
-    full_text: str, article_pattern: str, selected_codes: list
-):
-
-    for i, match in enumerate(re.finditer(article_pattern, full_text)):
-        needle = match.groupdict()
-        qualified_needle = {
-            key: value for key, value in needle.items() if value is not None
-        }
-        # msg = f"#{i+1}\t{qualified_needle}"
-        # print(msg)
-        # logging.debug(msg)
-        # get the code shortname based on regex group name <code>
-        code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
-        if code in selected_codes:
-            match = match.group("ref").strip()
-            if match != "":
-                yield code, get_code_full_name_from_short_code(code), match
-
-
-def get_code_refs(full_text, pattern_format, selected_codes):
-    # Force to detect every article of every code
-    article_pattern = switch_pattern(None, pattern_format)
-    if pattern_format == "article_code":
-        return get_code_refs_classical_pattern(
-            full_text, article_pattern, selected_codes
-        )
-    else:
-        return get_code_refs_reversed_pattern(
-            full_text, article_pattern, selected_codes
-        )
-
-
+        
+#@logger
 def normalize_references(ref):
     # split multiple articles of a same code
     refs = [
@@ -162,9 +100,38 @@ def normalize_references(ref):
                 normalized_refs.append(ref)
     return normalized_refs
 
+def get_code_refs(full_text, selected_codes=None, pattern_format="article_code"):
+    # Force to detect every code in case an unselected code is present
+    regex_pattern = re.compile(switch_pattern(None, pattern_format), re.I)
+    
+    if selected_codes is None:
+        selected_codes = CODE_REFERENCE.keys()
+    for i, match in enumerate(re.finditer(regex_pattern, full_text)):
+        needle = match.groupdict()
+        qualified_needle = {
+            key: value for key, value in needle.items() if value is not None
+        }
+        msg = f"#{i+1}\t{qualified_needle}"
+        # logging.debug(msg)
+        # get the code shortname based on regex group name <code>
+        code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
+        
+        if code in selected_codes:
+            match = match.group("ref").strip()
+            if match != "":
+                for art_num in normalize_references(match):
+                    
+                    yield code, art_num
+                    # yield code, get_code_full_name_from_short_code(code), normalize_references(match)
 
+
+    
+
+
+
+#@logger
 def get_matching_results_dict(
-    full_text, selected_short_codes=[], pattern_format="article_code"
+    full_text, selected_codes=None, pattern_format="article_code"
 ):
     """
     Une fonction qui renvoie un dictionnaire de resultats:
@@ -183,15 +150,12 @@ def get_matching_results_dict(
     code_found: dict
         a dict compose of short version of code as key and list of the detected articles references  as values {code: [art_ref, art_ref2, ... ]}
     """
-    selected_codes = filter_code_reference(selected_short_codes)
-
+    
     code_found = {}
     # normalisation
-    full_text = re.sub(
-        r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    )
-    for short_code, code, ref in get_code_refs(
-        full_text, pattern_format, selected_codes
+    
+    for short_code, ref in get_code_refs(
+        full_text, selected_codes, pattern_format
     ):
         if short_code not in code_found:
             # append article references
@@ -201,9 +165,9 @@ def get_matching_results_dict(
             code_found[short_code].extend(normalize_references(ref))
     return code_found
 
-
+#@logger
 def get_matching_result_item(
-    full_text, selected_shortcodes=[], pattern_format="article_code"
+    full_text, selected_codes=None, pattern_format="article_code"
 ):
     """ "
     Renvoie les références des articles détectés dans le texte
@@ -223,13 +187,11 @@ def get_matching_result_item(
 
     article_number:str
     """
-    selected_codes = filter_code_reference(selected_shortcodes)
-
-    full_text = re.sub(
-        r"\s{2,}|\r{1,}|\n{1,}|\t{1,}|\xa0{1,}", " ", " ".join(full_text)
-    )
-    for short_code, code, refs in get_code_refs(
-        full_text, pattern_format, selected_codes
+    
+    for short_code, refs in get_code_refs(
+        full_text, selected_codes, pattern_format, 
     ):
+        code = get_code_full_name_from_short_code(short_code)
         for ref in normalize_references(refs):
+            
             yield (short_code, code, ref)

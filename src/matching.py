@@ -84,20 +84,28 @@ def normalize_references(ref):
     for ref in refs:
         ref = "".join([r for r in ref if r.isdigit() or r in ["L", "A", "R", "D", "-"]])
         ref = re.sub(r"-{2,}", "", ref)
+        
         # remove first caret -2323 => 2323
-        if ref.endswith("-"):
-            ref = ref[:-1]
-        if ref.startswith("-"):
-            ref = ref[1:]
-        # remove caret separating article nb between first letter
-        # exemple: L-248-1 = > L248-1
+        # remove last caret 2232- => 2232
+        ref = re.sub(r"(^-|-$)", "", ref)
+        # ref = re.sub(r"-$", "", ref)
+        print(">>>", ref)
+        
+        # remove if more than one letter
+        del_add_letter = [i for i, c in enumerate(ref) if c in ["L", "A", "R", "D"]]
+        if len(del_add_letter) > 1:
+            list_ref = list(ref)
+            for c in del_add_letter[0:-1]:
+                list_ref.pop(c)
+            ref = "".join(list_ref)    
         special_ref = ref.split("-", 1)
+        print(special_ref)
         if special_ref[0] in ["L", "A", "R", "D"]:
-            normalized_refs.append("".join(special_ref))
+            ref = "".join(special_ref)    
 
-        else:
-            if ref not in ["", " "]:
-                normalized_refs.append(ref)
+        if ref not in ["", " "]:
+            normalized_refs.append(ref)
+
     return normalized_refs
 
 def get_code_refs(full_text, selected_codes=None, pattern_format="article_code"):
@@ -117,13 +125,13 @@ def get_code_refs(full_text, selected_codes=None, pattern_format="article_code")
         code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
         
         if code in selected_codes:
+            code_name = get_code_full_name_from_short_code(code)
             match = match.group("ref").strip()
             if match != "":
-                for art_num in normalize_references(match):
+                
+                yield [[code, code_name, art_num] for art_num in normalize_references(match)]
                     
-                    yield code, art_num
-                    # yield code, get_code_full_name_from_short_code(code), normalize_references(match)
-
+                    
 
     
 
@@ -154,22 +162,23 @@ def get_matching_results_dict(
     code_found = {}
     # normalisation
     
-    for short_code, ref in get_code_refs(
+    for code_refs in get_code_refs(
         full_text, selected_codes, pattern_format
     ):
+        short_code, code_name, ref = code_refs
         if short_code not in code_found:
             # append article references
-            code_found[short_code] = normalize_references(ref)
+            code_found[(short_code, code_name)] = normalize_references(ref)
         else:
             # append article references to existing list
-            code_found[short_code].extend(normalize_references(ref))
+            code_found[(short_code, code_name)].extend(normalize_references(ref))
     return code_found
 
 #@logger
 def get_matching_result_item(
     full_text, selected_codes=None, pattern_format="article_code"
 ):
-    """ "
+    """
     Renvoie les références des articles détectés dans le texte
 
     Arguments
@@ -187,11 +196,14 @@ def get_matching_result_item(
 
     article_number:str
     """
+    yield from get_code_refs(full_text,selected_codes, pattern_format)
+        
+    # print(results)
     
-    for short_code, refs in get_code_refs(
-        full_text, selected_codes, pattern_format, 
-    ):
-        code = get_code_full_name_from_short_code(short_code)
-        for ref in normalize_references(refs):
-            
-            yield (short_code, code, ref)
+    # for code_refs in get_code_refs(
+    #     full_text, selected_codes, pattern_format
+    # ):
+    #     for code_ref in code_refs:
+    #         short_code, ref = code_ref
+    #         code_name = get_code_full_name_from_short_code(short_code)
+    #         yield (short_code, code_name, ref)

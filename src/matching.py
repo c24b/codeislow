@@ -15,7 +15,7 @@ from code_references import (
     CODE_REFERENCE
 )
 
-ARTICLE_REGEX = re.compile(r"(?P<art>(Articles?|Art\.))")
+ARTICLE_REGEX = re.compile(r"(?P<art>(Articles?|Art\.))", re.I)
 #ARTICLE_NUM = r"(?P<ref>(L|A|R|D)?\.?\s?\d{1,5}(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?.*?(\d{1,5})?)"
 
 
@@ -23,6 +23,7 @@ ARTICLE_REGEX = re.compile(r"(?P<art>(Articles?|Art\.))")
 #@logger
 def normalize_references(ref):
     # split multiple articles of a same code
+    print("REF", ref)
     refs = [
         n
         for n in re.split(r"(\set\s|,\s|\sdu)", ref)
@@ -44,6 +45,7 @@ def normalize_references(ref):
     ]
     normalized_refs = []
     for ref in refs:
+        
         ref = "".join([r for r in ref if r.isdigit() or r in ["L", "A", "R", "D", "-"]])
         ref = re.sub(r"-{2,}", "", ref)
         # remove first and last caret -2323 or 2323- => 2323
@@ -65,7 +67,7 @@ def normalize_references(ref):
 
 def get_code_refs(full_text, selected_codes=None, pattern_format="article_code"):
     # Force to detect every code in case an unselected code is present
-    # but maintaining the option to build the regex
+    # but maintaining the option to build the regex with only selected codes
     code_regex = re.compile(get_selected_codes_regex(selected_codes), re.I)
     if pattern_format not in ["article_code", "code_article"]:
         raise ValueError(
@@ -74,7 +76,9 @@ def get_code_refs(full_text, selected_codes=None, pattern_format="article_code")
     # Then filter codes  
     if selected_codes is None:
         selected_codes = CODE_REFERENCE.keys()
+    #split text by code occurences
     split_text = [n for n in re.split(code_regex, full_text) if n is not None and n != ' ']
+    #remove subsequents mentions produced by split
     remove_subs_dups = [g for g, _ in itertools.groupby(split_text)]
     codes_found = []
     refs_found = []
@@ -105,6 +109,7 @@ def get_code_refs(full_text, selected_codes=None, pattern_format="article_code")
             if code in selected_codes:
                 code_name = get_code_full_name_from_short_code(code)
                 for art_num in normalize_references(ref):
+                    print(ref, art_num)
                     yield [code, code_name, art_num]
                 
 

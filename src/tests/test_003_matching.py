@@ -221,9 +221,8 @@ class TestTextMatchingIterator:
     def test_text_pattern_code_article(self, input_expected):
         input, expected = input_expected
 
-        for item in get_matching_result_item(input, None, "code_article"):
-            for i in item:
-                assert list(i) == expected, (i, expected)
+        for item in list(get_matching_result_item(input, None, "code_article")):
+            assert item == expected, (item, expected)
 
     @pytest.mark.parametrize(
         "input_expected",
@@ -250,32 +249,30 @@ class TestTextMatchingIterator:
     )
     def test_text_multiple_art_same_code(self, input_expected):
         input, regex_fmt, expected = input_expected
-        for item in get_code_refs(input, None, regex_fmt):
-            assert item == expected, (item, expected)
-        for item in get_matching_result_item(input, None, regex_fmt):
-            assert item == expected, (item, expected)
+        # for item in list(get_code_refs(input, None, regex_fmt)):
+        #     assert item == expected, (item, expected)
+        for item, expect in zip(list(get_matching_result_item(input, None, regex_fmt)), expected):
+            assert item == expect, (item, expect)
         # for item in get_matching_result_item(input, None, regex_fmt):
         #     for i in item:
         #         assert list(i) == expected, (i, expected)
 
-    def test_text_pattern_code_article_ref1x(self):
-        # NO CPCE ref dans le doc
+    def test_text_pattern_code_article_1(self):
+        
         code_reference_test = CODE_REFERENCE
         # del code_reference_test["CPCE"]
 
         chunk = "C’est la solution posée dans le Code civil article 1120"
-        for item in get_matching_result_item(chunk):
-            assert item == ("Code civil", "1120"), item
-        for code, item in get_matching_results_dict(chunk):
-            assert code == "Code civil"
-            assert item == "1120"
-
+        for item in get_matching_result_item(chunk, ):
+            assert item == ["CCIV", "Code civil", "1120"], item
+        
+    def test_text_pattern_code_article_x(self):
         multi_chunk = "C’est la solution posée dans le Code civil article 1120 et de C. civ. art. 2288"
-        for i, item in enumerate(get_matching_result_item(multi_chunk)):
+        for i, item in enumerate(list(get_matching_result_item(multi_chunk, None, "code_article"))):
             if i == 0:
-                assert item == ("Code civil", "1120"), item
+                assert item == ["CCIV", "Code civil", "1120"], item
             else:
-                assert item == ("Code civil", "2288"), item
+                assert item == ["CCIV", "Code civil", "2288"], item
 
 
 class TestDocMatchingIterator:

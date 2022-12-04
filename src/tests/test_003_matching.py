@@ -291,61 +291,60 @@ class TestDocMatchingIterator:
             full_text = parse_doc(abspath)
             restored_abspath = restore_test_file(file_path)
             results_dict = get_matching_results_dict(full_text, None, "article_code")
-
-            # del code_reference_test["CPCE"]
             code_list = list(results_dict.keys())
 
-            assert len(code_list) == len(code_reference_test), set(
+            assert len(code_list) == len(code_reference_test), (set(
                 code_reference_test
-            ) - set(code_list)
+            ) - set(code_list), code_list)
             assert sorted(code_list) == sorted(code_reference_test), set(
                 code_reference_test
             ) - set(code_list)
             articles_detected = [
                 item for sublist in results_dict.values() for item in sublist
             ]
-            assert len(articles_detected) == 37, len(articles_detected)
-            assert results_dict["CCIV"] == [
-                "1120",
-                "2288",
-                "1240-1",
-                "1140",
-                "1",
-                "349",
-                "39999",
-                "3-12",
-                "12-4-6",
-                "14",
-                "15",
-                "27",
-            ], results_dict["CCIV"]
-            assert results_dict["CPRCIV"] == ["1038", "1289-2"], results_dict["CPRCIV"]
-            assert results_dict["CASSUR"] == [
-                "L385-2",
-                "R343-4",
-                "A421-13",
-            ], results_dict["CASSUR"]
-            assert results_dict["CCOM"] == ["L611-2"], results_dict["CCOM"]
-            assert results_dict["CTRAV"] == ["L1111-1"], results_dict["CTRAV"]
-            assert results_dict["CPI"] == ["L112-1", "L331-4"], results_dict["CPI"]
-            assert results_dict["CPEN"] == ["131-4", "225-7-1"], results_dict["CPEN"]
-            assert results_dict["CPP"] == ["694-4-1", "R57-6-1"], results_dict["CPP"]
-            assert results_dict["CCONSO"] == ["L121-14", "R742-52"], results_dict[
-                "CCONSO"
-            ]
-            assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
-            assert results_dict["CSS"] == ["L173-8"], results_dict["CSS"]
-            assert results_dict["CSP"] == ["L1110-1"], results_dict["CSP"]
-            assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
-            assert results_dict["CJA"] == ["L121-2"], ("CJA", results_dict["CJA"])
-            assert results_dict["CGCT"] == ["L1424-71", "L1"], (
-                "CGCT",
-                results_dict["CGCT"],
-            )
-            assert results_dict["CESEDA"] == ["L753-1", "12"], (
-                "CESEDA",
-                results_dict["CESEDA"],
-            )
+            assert len(articles_detected) == 38, len(articles_detected)
+            assert False, sorted(results_dict.items())
+            # assert results_dict["CCIV"] == [
+            #     "1120",
+            #     "2288",
+            #     "1240-1",
+            #     "1140",
+            #     "1",
+            #     "349",
+            #     "39999",
+            #     "3-12",
+            #     "12-4-6",
+            #     "14",
+            #     "15",
+            #     "27",
+            # ], results_dict["CCIV"]
+            # assert results_dict["CPRCIV"] == ["1038", "1289-2"], results_dict["CPRCIV"]
+            # assert results_dict["CASSUR"] == [
+            #     "L385-2",
+            #     "R343-4",
+            #     "A421-13",
+            # ], results_dict["CASSUR"]
+            # assert results_dict["CCOM"] == ['L611-2', 'L132-1', 'R811-3'], results_dict["CCOM"]
+            # assert results_dict["CTRAV"] == ["L1111-1"], ("CTRAV", results_dict["CTRAV"])
+            # assert results_dict["CPI"] == ["L112-1", "L331-4"], results_dict["CPI"]
+            # assert results_dict["CPEN"] == ["131-4", "225-7-1"], results_dict["CPEN"]
+            # assert results_dict["CPP"] == ["694-4-1", "R57-6-1"], results_dict["CPP"]
+            # assert results_dict["CCONSO"] == ["L121-14", "R742-52"], results_dict[
+            #     "CCONSO"
+            # ]
+            # assert results_dict["CSI"] == ["L622-7", "R314-7"], results_dict["CSI"]
+            # assert results_dict["CSS"] == ["L173-8"], results_dict["CSS"]
+            # assert results_dict["CSP"] == ["L1110-1"], results_dict["CSP"]
+            # assert results_dict["CENV"] == ["L124-1"], ("CENV", results_dict["CENV"])
+            # assert results_dict["CJA"] == ["L121-2"], ("CJA", results_dict["CJA"])
+            # assert results_dict["CGCT"] == ["L1424-71", "L1"], (
+            #     "CGCT",
+            #     results_dict["CGCT"],
+            # )
+            # assert results_dict["CESEDA"] == ["L753-1", "12"], (
+            #     "CESEDA",
+            #     results_dict["CESEDA"],
+            # )
 
     def test_doc_pattern_article_code_filter1(self):
         selected_codes = ["CASSUR"]

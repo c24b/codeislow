@@ -23,7 +23,6 @@ ARTICLE_REGEX = re.compile(r"(?P<art>(Articles?|Art\.))", re.I)
 #@logger
 def normalize_references(ref):
     # split multiple articles of a same code
-    print("REF", ref)
     refs = [
         n
         for n in re.split(r"(\set\s|,\s|\sdu)", ref)
@@ -55,7 +54,10 @@ def normalize_references(ref):
         if len(del_add_letter) > 1:
             list_ref = list(ref)
             for c in del_add_letter[0:-1]:
-                list_ref.pop(c)
+                try:
+                    list_ref.pop(c)
+                except IndexError:
+                    pass
             ref = "".join(list_ref)    
         special_ref = ref.split("-", 1)
         if special_ref[0] in ["L", "A", "R", "D"]:
@@ -95,7 +97,9 @@ def get_code_refs(full_text, selected_codes=None, pattern_format="article_code")
             
             refs = re.split(ARTICLE_REGEX, chunk)
             if len(refs) > 4:
-                raise Exception(f"Multiple mentions of articles: {chunk}")
+                #print(f"WARNING: Multiple mentions of articles: {refs}")
+                refs_found.append(refs[-1])
+                
             else:
                 refs_found.append(refs[-1])
     if len(refs_found) > len(codes_found):
@@ -109,7 +113,6 @@ def get_code_refs(full_text, selected_codes=None, pattern_format="article_code")
             if code in selected_codes:
                 code_name = get_code_full_name_from_short_code(code)
                 for art_num in normalize_references(ref):
-                    print(ref, art_num)
                     yield [code, code_name, art_num]
                 
 
@@ -144,10 +147,10 @@ def get_matching_results_dict(
         short_code, code_name, ref = code_refs
         if short_code not in code_found:
             # append article references
-            code_found[(short_code, code_name)] = normalize_references(ref)
+            code_found[short_code] = normalize_references(ref)
         else:
             # append article references to existing list
-            code_found[(short_code, code_name)].extend(normalize_references(ref))
+            code_found[short_code].extend(normalize_references(ref))
     return code_found
 
 #@logger

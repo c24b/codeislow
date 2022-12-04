@@ -8,53 +8,16 @@ Ce module permet la detection des articles du code de droit français
 """
 from logs import logger
 import re
-
+import itertools
 from code_references import (
     get_selected_codes_regex,
     get_code_full_name_from_short_code,
     CODE_REFERENCE
 )
 
-ARTICLE_REGEX = r"(?P<art>(Articles?|Art\.))"
+ARTICLE_REGEX = re.compile(r"(?P<art>(Articles?|Art\.))")
 #ARTICLE_NUM = r"(?P<ref>(L|A|R|D)?\.?\s?\d{1,5}(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?(-\d{1,5})?.*?(\d{1,5})?)"
 
-def switch_pattern(selected_codes=None, pattern="article_code"):
-    """
-    Build pattern recognition using pattern short code switch
-
-    Arguments
-    ---------
-    selected_codes: array
-        a list of short codes to select. Default to None
-    pattern: str
-        a string article_code or code_article. Default to article_code
-    Returns
-    ---------
-    regex_pattern: str
-        a compiled regex pattern
-    Raise
-    --------
-    ValueError:
-        pattern name is wrong
-    """
-
-    
-    if pattern not in ["article_code", "code_article"]:
-        raise ValueError(
-            "Wrong pattern name: choose between 'article_code' or 'code_article'"
-        )
-    
-    code_regex = get_selected_codes_regex(selected_codes)
-    assert code_regex is not None or code_regex != ""
-
-    #default pattern is article_code
-    if pattern == "article_code":
-        # pattern_r = f"{ARTICLE_REGEX}.*?{ARTICLE_NUM}.*?d(u|e).*?{code_regex}"
-        pattern_r = f"{ARTICLE_REGEX}\s?(?P<ref>.*)du\s{code_regex}"
-        return pattern_r
-    if pattern == "code_article":
-        pattern_r = f"{code_regex}.*?{ARTICLE_REGEX}(?P<ref>.*?\d)$"
-        return pattern_r
 
         
 #@logger
@@ -79,18 +42,12 @@ def normalize_references(ref):
         )
         for ref in refs
     ]
-
     normalized_refs = []
     for ref in refs:
         ref = "".join([r for r in ref if r.isdigit() or r in ["L", "A", "R", "D", "-"]])
         ref = re.sub(r"-{2,}", "", ref)
-        
-        # remove first caret -2323 => 2323
-        # remove last caret 2232- => 2232
+        # remove first and last caret -2323 or 2323- => 2323
         ref = re.sub(r"(^-|-$)", "", ref)
-        # ref = re.sub(r"-$", "", ref)
-        print(">>>", ref)
-        
         # remove if more than one letter
         del_add_letter = [i for i, c in enumerate(ref) if c in ["L", "A", "R", "D"]]
         if len(del_add_letter) > 1:
@@ -99,10 +56,8 @@ def normalize_references(ref):
                 list_ref.pop(c)
             ref = "".join(list_ref)    
         special_ref = ref.split("-", 1)
-        print(special_ref)
         if special_ref[0] in ["L", "A", "R", "D"]:
             ref = "".join(special_ref)    
-
         if ref not in ["", " "]:
             normalized_refs.append(ref)
 
@@ -110,32 +65,48 @@ def normalize_references(ref):
 
 def get_code_refs(full_text, selected_codes=None, pattern_format="article_code"):
     # Force to detect every code in case an unselected code is present
-    regex_pattern = re.compile(switch_pattern(None, pattern_format), re.I)
-    
+    # but maintaining the option to build the regex
+    code_regex = re.compile(get_selected_codes_regex(selected_codes), re.I)
+    if pattern_format not in ["article_code", "code_article"]:
+        raise ValueError(
+            "Wrong pattern name: choose between 'article_code' or 'code_article'"
+        )
+    # Then filter codes  
     if selected_codes is None:
         selected_codes = CODE_REFERENCE.keys()
-    for i, match in enumerate(re.finditer(regex_pattern, full_text)):
-        needle = match.groupdict()
-        qualified_needle = {
-            key: value for key, value in needle.items() if value is not None
-        }
-        msg = f"#{i+1}\t{qualified_needle}"
-        # logging.debug(msg)
-        # get the code shortname based on regex group name <code>
-        code = [k for k in qualified_needle.keys() if k not in ["ref", "art"]][0]
+    split_text = [n for n in re.split(code_regex, full_text) if n is not None and n != ' ']
+    remove_subs_dups = [g for g, _ in itertools.groupby(split_text)]
+    codes_found = []
+    refs_found = []
+    for chunk in remove_subs_dups:
+        m = re.match(code_regex, chunk) 
+        if m is not None:
+            needle = m.groupdict()
+            qualified_needle = [
+                (key,value) for key, value in needle.items() if value is not None
+            ]
+            code_short = qualified_needle[0][0]
+            codes_found.append(code_short)
+        else:
+            
+            refs = re.split(ARTICLE_REGEX, chunk)
+            if len(refs) > 4:
+                raise Exception(f"Multiple mentions of articles: {chunk}")
+            else:
+                refs_found.append(refs[-1])
+    if len(refs_found) > len(codes_found):
+        if pattern_format == "code_article":
+            codes_found.insert(0,"")
+        else:
+            codes_found.append("")
         
-        if code in selected_codes:
-            code_name = get_code_full_name_from_short_code(code)
-            match = match.group("ref").strip()
-            if match != "":
+    for code, ref in zip(codes_found, refs_found):
+        if code != "" and ref != "":
+            if code in selected_codes:
+                code_name = get_code_full_name_from_short_code(code)
+                for art_num in normalize_references(ref):
+                    yield [code, code_name, art_num]
                 
-                yield [[code, code_name, art_num] for art_num in normalize_references(match)]
-                    
-                    
-
-    
-
-
 
 #@logger
 def get_matching_results_dict(

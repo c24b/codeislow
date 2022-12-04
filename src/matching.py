@@ -169,12 +169,4 @@ def get_matching_result_item(
     """
     yield from get_code_refs(full_text,selected_codes, pattern_format)
         
-    # print(results)
     
-    # for code_refs in get_code_refs(
-    #     full_text, selected_codes, pattern_format
-    # ):
-    #     for code_ref in code_refs:
-    #         short_code, ref = code_ref
-    #         code_name = get_code_full_name_from_short_code(short_code)
-    #         yield (short_code, code_name, ref)

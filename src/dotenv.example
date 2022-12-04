@@ -1,3 +1,7 @@
-API_KEY=xxxxxxxxxxxxxxxxxx
-API_SECRET=xxxxxxxxxxxxxxxxxx
-APP_LOCATION=
+API_KEY=
+API_SECRET=
+APP_LOCATION=gunicorn
+APP_HOST=0.0.0.0
+APP_PORT=8080
+DEBUG=False
+RELOAD=True

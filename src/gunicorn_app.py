@@ -6,7 +6,7 @@ Main Bottle app
 
 """
 import os
-
+from dotenv import load_dotenv
 from bottle_sslify import SSLify
 import bottle
 from bottle import Bottle, request
@@ -14,7 +14,6 @@ from jinja2 import Environment, FileSystemLoader
 from result_templates import start_results, end_results
 from code_references import CODE_REFERENCE, CODE_REGEX
 from codeislow import load_result
-from dotenv import load_dotenv
 
 app = Bottle()
 curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -51,6 +50,15 @@ def codes():
     return template.render(codes_full_list=code_full_list)
 
 
+# @app.route('/ajax')
+# def ajax():
+#     template = environment.get_template("results.html")
+#     return template.render('results.html',
+#                            result=result)
+# https://stackoverflow.com/questions/69125397/call-function-with-arguments-from-user-input-in-python3-flask-jinja2-template
+# https://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
+
+
 @app.route("/upload/", method="POST")
 def upload():
     if not os.path.exists("tmp"):
@@ -61,15 +69,15 @@ def upload():
     if ext not in (".docx", ".odt", ".pdf", ".doc"):
         return "Le format du fichier est incorrect"
     file_path = os.path.join("tmp", upload.filename)
-    try:
-        upload.save(file_path)
-    except OSError:
-        pass
-    yield """<div id="processing" class="alert alert-info" role="alert">
-    <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
-  <span aria-hidden="true">&times;</span>
-</button>Traitement et détection des articles en cours...<br>Veuillez patientez...</div>
-"""
+    upload.save(file_path)
+    yield """
+    <div id="processing" class="alert alert-info" role="alert">
+        <button type="button" class="close" onclick="style.display = 'none'" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        Traitement et détection des articles en cours...<br>Veuillez patientez...
+    </div>
+    """
     past = int(request.forms.get("user_past"))
     future = int(request.forms.get("user_future"))
     selected_codes = [
@@ -95,22 +103,17 @@ def upload():
         </div>
         """
         yield row
+    
 
     yield end_results
-
-# app = SSLify(app)
 
 if __name__ == "__main__":
     load_dotenv()
     if os.environ.get("APP_LOCATION") == "heroku":
         SSLify(app)
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    elif os.environ.get("APP_LOCATION") == "gunicorn":
-        SSLify(app)
-        # n'est pas pris en compte par gunicorn
-        app.run(host=os.environ.get("APP_HOST", "0.0.0.0"), port=os.environ.get("APP_PORT", 5000), server=os.environ.get("APP_LOCATION"), debug=os.environ.get("DEBUG", False), reloader=os.environ.get("RELOAD", False), workers=4)
 
     else:
-        app.run(host="localhost", port=8080, debug=os.environ.get("DEBUG", True), reloader=os.environ.get("RELOAD", True))
-        
+        SSLify(app)
+        app.run(host=os.environ.get("APP_HOST"), port=os.environ.get("APP_PORT"), server=os.environ.get("APP_LOCATION"), debug=os.environ.get("DEBUG"), reloader=os.environ.get("RELOAD"), workers=4)
 

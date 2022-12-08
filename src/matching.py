@@ -60,7 +60,7 @@ def switch_pattern(selected_codes=None, pattern="article_code"):
     else:
         return re.compile(code_regex+".*?"+ARTICLE_REGEX+r"(?P<ref>.*?((L|A|R|D)?(\.|\s|\.\s))?\d{1,4}(-\d{1,3})?(-\d{1,2})?)", re.I)
     
-def get_code_refs(full_text, pattern_format, selected_codes):
+def get_code_refs(full_text, selected_codes, pattern_format="article_code"):
     # Force to detect every article of every code
     article_pattern = switch_pattern(None, pattern_format)
     for i, match in enumerate(re.finditer(article_pattern, full_text)):
@@ -126,7 +126,7 @@ def normalize_references(ref):
 
 
 def get_matching_results_dict(
-    full_text, selected_short_codes=[], pattern_format="article_code"
+    full_text, selected_codes=None, pattern_format="article_code"
 ):
     """
     Une fonction qui renvoie un dictionnaire de resultats:
@@ -146,7 +146,7 @@ def get_matching_results_dict(
         a dict compose of short version of code as key and list of the detected articles references  as values {code: [art_ref, art_ref2, ... ]}
     """
     if selected_codes is None:
-        selected_codes = CODE_REFERENCES
+        selected_codes = CODE_REFERENCE
 
     code_found = {}
     # normalisation
@@ -158,15 +158,15 @@ def get_matching_results_dict(
     ):
         if short_code not in code_found:
             # append article references
-            code_found[short_code] = normalize_references(ref)
+            code_found[short_code] = ref
         else:
             # append article references to existing list
-            code_found[short_code].extend(normalize_references(ref))
+            code_found[short_code].extend(ref)
     return code_found
 
 
 def get_matching_result_item(
-    full_text, selected_codes=[], pattern_format="article_code"
+    full_text, selected_codes=None, pattern_format="article_code"
 ):
     """ "
     Renvoie les références des articles détectés dans le texte

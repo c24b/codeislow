@@ -1,0 +1,26 @@
+"(?P<ref>(L|A|R|D)\.?)?(\s*?\d+-?\d*-?)?(\s*|\s?,\s|\s?et\s|alinéa|al\.|alinea|°)?\d*)"
+r"(L|A|R|D)\.?)?\s*\d+-?\d*-?\d*),?\s*(alinéa|al\.)?\s*\d*\s?°?\s*"
+r",\s*((L|A|R|D)\.?)?\s*\d+-?\d*-?\d*),?\s*(alinéa|al\.)?\s*\d*\s?°?\s*"
+r",\s*((L|A|R|D)\.?)?\s*\d+-?\d*-?\d*),?\s*(alinéa|al\.)?\s*\d*\s?°?\s*"
+r"(,\s*((L|A|R|D)\.?)?\s*\d+-?\d*-?\d*),?\s*(alinéa|al\.)?\s*\d*\s?°?\s*)?)?)?"
+r"(et\s*((L|A|R|D)\.?)?\s*\d+-?\d*-?\d*),?\s*(alinéa|al\.)?\s*\d*\s?°?\s*)?"
+r"(et s\.|et suivants)?"
+
+
+reg_beginning = {
+    "UNIVERSAL": r"((?:L\.?|R\.?|A\.?|D\.?)?\s*\d+-?\d*-?\d*),?\s*(?:alinéa|al\.)?\s*\d*\s?°?\s*"
+                 r"(?:,\s*((?:L\.?|R\.?|A\.?|D\.?)?\s*\d+-?\d*-?\d*),?\s*(?:alinéa|al\.)?\s*\d*\s?°?\s*"
+                 r"(?:,\s*((?:L\.?|R\.?|A\.?|D\.?)?\s*\d+-?\d*-?\d*),?\s*(?:alinéa|al\.)?\s*\d*\s?°?\s*"
+                 r"(?:,\s*((?:L\.?|R\.?|A\.?|D\.?)?\s*\d+-?\d*-?\d*),?\s*(?:alinéa|al\.)?\s*\d*\s?°?\s*)?)?)?"
+                 r"(?:et\s*((?:L\.?|R\.?|A\.?|D\.?)?\s*\d+-?\d*-?\d*),?\s*(?:alinéa|al\.)?\s*\d*\s?°?\s*)?"
+                 r"(?:et s\.|et suivants)?",
+}
+
+
+BLACKLIST = ["convention", "loi", "page", ".com", "p.", "www", "http", "janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août"," septembre", "octobre", "novembre", "décembre"]
+ARTICLE_SIMPLE = re.compile(r"(?P<art>(Articles?|Art\.))", re.I)
+ARTICLE_NUM_SIMPLE = re.compile(r"(?P<num>((L|A|R|D)?(\.|\s|\.\s)?\d{1,4}(-\d{1,3})?)(-\d{1,2})?)")
+if pattern_format == "article_code":    
+            art_num_regex = re.compile(RE_ART+'(?P<ref>.*?)'+RE_CODE, re.I)
+        else:
+            art_num_regex = re.compile(RE_CODE+".*?"+RE_ART+r"(?P<ref>.*?((L|A|R|D)?(\.|\s|\.\s))?\d{1,4}(-\d{1,3})?(-\d{1,2})?)", re.I)

@@ -17,6 +17,20 @@ from odf.opendocument import load
 
 ACCEPTED_EXTENSIONS = ("odt", "pdf", "docx", "doc")
 
+def get_styles(doc):
+   styles= {}
+   for ast in doc.automaticstyles.childNodes:
+
+    name= ast.getAttribute('name')
+    style= {}
+    styles[name]= style
+
+    for k in ast.attributes.keys():
+        style[k[1]]= ast.attributes[k]
+    for n in ast.childNodes:
+        for k in n.attributes.keys():
+            style[n.qname[1] + "/" + k[1]]= n.attributes[k]
+    return styles
 
 def parse_doc(file_path: str) -> list:
     """
@@ -67,4 +81,4 @@ def parse_doc(file_path: str) -> list:
                 full_text.append((paragraphs[i].text))
     full_text = [n for n in full_text if n not in ["\n", "", " "]]
     os.remove(file_path)
-    return full_text
+    return " ".join(full_text)

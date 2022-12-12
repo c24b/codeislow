@@ -320,6 +320,7 @@ class TestDocMatchingIterator:
         # NO CPCE ref dans le doc
         code_reference_test = CODE_REFERENCE
         del code_reference_test["CPCE"]
+        del code_reference_test["CMF"]
 
         file_paths = ["newtest.odt", "newtest.docx", "newtest.pdf"]
         for file_path in file_paths:
@@ -342,22 +343,39 @@ class TestDocMatchingIterator:
             articles_detected = [
                 item for sublist in results_dict.values() for item in sublist
             ]
-            assert len(articles_detected) == 38, len(articles_detected)
-            assert False, sorted(results_dict.items())
-            # assert results_dict["CCIV"] == [
-            #     "1120",
-            #     "2288",
-            #     "1240-1",
-            #     "1140",
-            #     "1",
-            #     "349",
-            #     "39999",
-            #     "3-12",
-            #     "12-4-6",
-            #     "14",
-            #     "15",
-            #     "27",
-            # ], results_dict["CCIV"]
+            assert len(articles_detected) == 39, len(articles_detected)
+            assert list(results_dict.keys()) == [
+                'CCIV',
+                'CPRCIV',
+                'CASSUR',
+                'CCOM',
+                'CTRAV',
+                'CPI',
+                'CPEN',
+                'CPP',
+                'CCONSO',
+                'CSI',
+                'CSS',
+                'CSP',
+                'CESEDA',
+                'CGCT',
+                'CJA',
+                'CENV'
+            ], list(results_dict.keys())
+            assert results_dict["CCIV"] == [
+                "1120",
+                "2288",
+                "1240-1",
+                "1140",
+                "1",
+                "349",
+                "39999",
+                "3-12",
+                "12-4-6",
+                "14",
+                "15",
+                "27",
+            ], results_dict["CCIV"]
             # assert results_dict["CPRCIV"] == ["1038", "1289-2"], results_dict["CPRCIV"]
             # assert results_dict["CASSUR"] == [
             #     "L385-2",
